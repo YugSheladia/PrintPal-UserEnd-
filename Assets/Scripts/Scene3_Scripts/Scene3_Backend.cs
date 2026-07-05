@@ -1,0 +1,705 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.Networking;
+
+
+
+//==================================================
+// CREATE ORDER CLASSES
+//==================================================
+[System.Serializable]
+public class CreateOrderRequest
+{
+    public int UserID;
+    public float FinalAmount;
+    public int StationeryID;
+
+    public List<PrintDTO> Prints;
+}
+
+[System.Serializable]
+public class PrintDTO
+{
+    public int PrintNumber;
+
+    public string PDFName;
+
+    public int Pages;
+    public int Copies;
+
+    public int PageSelection;
+    public int SideSelection;
+    public int Collated;
+    public int Orientation;
+    public int Margin;
+    public int PagesPerSheet;
+    public int Color;
+
+    public int EffectiveSheets;
+    public float BillAmount;
+}
+
+[System.Serializable]
+public class CreateOrderResponse
+{
+    public bool Success;
+
+    public int OrderID;
+    public int OTP;
+
+    public int ApproximateTimeLeft;
+
+    public string Message;
+}
+
+
+
+//==================================================
+// ORDERS TABLE
+//==================================================
+[System.Serializable]
+public class OrderSummary
+{
+    public int OrderID;
+    public int UserID;
+
+    public int OrderOTP;
+
+    public int ApproximateTimeLeft;
+
+    public float FinalAmount;
+
+    public string OrderStatus;
+
+    public string CreatedAt;
+
+    public int Completed;
+
+    public List<PrintDetails> Prints = new();
+}
+
+[System.Serializable]
+public class OrderSummaryWrapper
+{
+    public bool Success;
+
+    public List<OrderSummary> Orders = new();
+}
+
+
+
+//==================================================
+// PRINTS TABLE
+//==================================================
+[System.Serializable]
+public class PrintSummary
+{
+    public int PrintID;
+
+    public int PrintNumber;
+
+    public int OrderID;
+
+    public string PDFName;
+
+    public int TotalPages;
+}
+
+[System.Serializable]
+public class PrintSummaryWrapper
+{
+    public List<PrintSummary> Prints = new();
+}
+
+
+
+//==================================================
+// PRINT SETTINGS TABLE
+//==================================================
+[System.Serializable]
+public class PrintSettingsSummary
+{
+    public int PrintSettingsID;
+
+    public int PrintID;
+
+    public int PageSelection;
+    public int SideSelection;
+    public int Collated;
+    public int Orientation;
+    public int Margin;
+    public int PagesPerSheet;
+
+    public int Color;
+    public int Copies;
+}
+
+[System.Serializable]
+public class PrintSettingsSummaryWrapper
+{
+    public List<PrintSettingsSummary> PrintSettings = new();
+}
+
+
+
+//==================================================
+// PRINT BILLS TABLE
+//==================================================
+[System.Serializable]
+public class PrintBillsSummary
+{
+    public int PrintBillID;
+
+    public int PrintID;
+
+    public int TotalPages;
+
+    public int EffectiveSheets;
+
+    public int TotalCopies;
+
+    public int Color;
+
+    public int SideSelection;
+
+    public int PagesPerSheet;
+
+    public float BillAmount;
+}
+
+[System.Serializable]
+public class PrintBillsSummaryWrapper
+{
+    public List<PrintBillsSummary> PrintBills = new();
+}
+
+
+
+//==================================================
+// Stationery TABLE
+//==================================================
+[System.Serializable]
+public class StationerySummary
+{
+    public int StationeryID;
+
+    public string StationeryName;
+
+    public string UPINumber;
+    public string PhoneNumber;
+    public string Email;
+
+    public int AutomaticPrinting;
+    public int IsActive;
+
+    public string CreatedAt;
+}
+
+[System.Serializable]
+public class StationerySummaryWrapper
+{
+    public bool Success;
+    public string Message;
+
+    public StationerySummary[] Stationeries;
+}
+
+
+
+
+//==================================================
+// MAIN CLASS
+//==================================================
+public class Scene3_Backend : MonoBehaviour
+{
+    [SerializeField] Scene3Manager      Scene3ManagerScript;
+    [SerializeField] PrintManager       PrintManagerScript;
+    [SerializeField] PrintBillsManager  PrintBillsManagerScript;
+    [SerializeField] OrderStatusManager OrderStatusManagerScript;
+    
+
+
+
+    CreateOrderRequest CurrentOrderRequest;
+
+    public OrderSummaryWrapper ConfirmedOrders = new();
+
+    public PrintSummaryWrapper ConfirmedPrints = new();
+
+    public PrintSettingsSummaryWrapper ConfirmedPrintSettings = new();
+
+    public PrintBillsSummaryWrapper ConfirmedPrintBills = new();
+
+
+
+    // CREATE ORDER
+    public void CreateOrder()
+    {
+        CreateOrderRequest Request = new();
+
+        Request.UserID = Script1.UserID;
+
+        Request.FinalAmount = PrintBillsManagerScript.FinalBillAmount;
+
+        Request.StationeryID = Script1.StationeryID;
+
+        Request.Prints = new List<PrintDTO>();
+
+
+
+        foreach (PrintDetails Print in PrintManagerScript.PrintDetailsList)
+        {
+            PrintDTO dto = new PrintDTO();
+
+            dto.PrintNumber = Print.PrintNumber;
+
+            dto.PDFName = Print.PDFName;
+
+            dto.Pages = Print.Pages;
+
+            dto.Copies = Print.Copies;
+
+            dto.PageSelection = (int)Print.PageSelection;
+            dto.SideSelection = (int)Print.SideSelection;
+            dto.Collated = (int)Print.CollatedOrNot;
+            dto.Orientation = (int)Print.Orientation;
+            dto.Margin = (int)Print.Margin;
+            dto.PagesPerSheet = (int)Print.PagesPerSheet;
+            dto.Color = (int)Print.Color;
+
+            dto.EffectiveSheets = Print.EffectiveSheets;
+            dto.BillAmount = Print.BillAmount;
+
+            Request.Prints.Add(dto);
+        }
+
+        CurrentOrderRequest = Request;
+
+        StartCoroutine(SubmitPrintSettingsToServer());
+    }
+    IEnumerator SubmitPrintSettingsToServer()
+    {
+        Debug.Log("StationeryID = " + Script1.StationeryID);
+
+        string json = JsonUtility.ToJson(CurrentOrderRequest);
+
+        byte[] raw = System.Text.Encoding.UTF8.GetBytes(json);
+
+        UnityWebRequest request = new UnityWebRequest(
+                                                        "http://localhost:3000/create-order",
+                                                        "POST"
+                                                     );
+
+        request.uploadHandler = new UploadHandlerRaw(raw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader(
+                                    "Content-Type",
+                                    "application/json"
+                                );
+
+        yield return request.SendWebRequest();
+
+
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+            Debug.LogError(request.downloadHandler.text);
+            yield break;
+        }
+
+
+
+        CreateOrderResponse Response = JsonUtility.FromJson<CreateOrderResponse>
+                                                   (
+                                                        request.downloadHandler.text
+                                                   );
+
+
+
+        if (!Response.Success)
+        {
+            Debug.LogError(Response.Message);
+            yield break;
+        }
+
+
+
+        Debug.Log(
+                    "Order Created\n\n" +
+                    "Order ID = " + Response.OrderID +
+                    "\nOTP = " + Response.OTP +
+                    "\nApproximate Time = " +
+                    Response.ApproximateTimeLeft
+                 );
+
+
+
+        PrintBillsManagerScript.ConfirmOrders();
+    }
+
+
+
+
+
+    // DOWNLOAD ALL USER ORDERS
+    public void GetOrdersForCurrentUser()
+    {
+        StartCoroutine(GetOrders());
+    }
+    IEnumerator GetOrders()
+    {
+        Debug.Log("Downloading Orders...");
+
+        // Clear previously downloaded data.
+        ConfirmedOrders.Orders.Clear();
+        ConfirmedPrints.Prints.Clear();
+        ConfirmedPrintSettings.PrintSettings.Clear();
+        ConfirmedPrintBills.PrintBills.Clear();
+
+        UnityWebRequest request = UnityWebRequest.Get
+                                                  (
+                                                        "http://localhost:3000/orders/user/id/"
+                                                        + Script1.UserID
+                                                  );
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+
+        Debug.Log(request.downloadHandler.text);
+
+        OrderSummaryWrapper Response = JsonUtility.FromJson<OrderSummaryWrapper>
+                                                   (
+                                                        request.downloadHandler.text
+                                                   );
+
+        if (Response == null || !Response.Success)
+        {
+            Debug.LogError("Failed to download orders.");
+            yield break;
+        }
+
+        ConfirmedOrders.Orders.AddRange(Response.Orders);
+
+        Debug.Log
+        (
+            "Downloaded "
+            + ConfirmedOrders.Orders.Count
+            + " Orders."
+        );
+
+        yield return StartCoroutine(GetPrints());
+
+        Debug.Log("Finished downloading Orders.");
+    }
+
+
+    // DOWNLOAD ALL PRINTS
+    IEnumerator GetPrints()
+    {
+        Debug.Log("Downloading Prints...");
+
+        foreach (OrderSummary Order in ConfirmedOrders.Orders)
+        {
+            UnityWebRequest request = UnityWebRequest.Get
+                                                      (
+                                                            "http://localhost:3000/prints/order/"
+                                                            + Order.OrderID
+                                                      );
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+                continue;
+            }
+
+            Debug.Log(request.downloadHandler.text);
+
+            PrintSummaryWrapper Response = JsonUtility.FromJson<PrintSummaryWrapper>
+                                                       (
+                                                            request.downloadHandler.text
+                                                       );
+
+            if (Response == null)
+            {
+                continue;
+            }
+
+            if (Response.Prints != null)
+            {
+                ConfirmedPrints.Prints.AddRange(Response.Prints);
+            }
+        }
+
+        Debug.Log
+        (
+            "Downloaded "
+            + ConfirmedPrints.Prints.Count
+            + " Prints."
+        );
+
+        yield return StartCoroutine(GetPrintSettings());
+
+        Debug.Log("Finished downloading Prints.");
+    }
+
+
+    // DOWNLOAD ALL PRINT SETTINGS
+    IEnumerator GetPrintSettings()
+    {
+        Debug.Log("Downloading Print Settings...");
+
+        foreach (PrintSummary Print in ConfirmedPrints.Prints)
+        {
+            UnityWebRequest request = UnityWebRequest.Get
+                                                      (
+                                                            "http://localhost:3000/settings/print/"
+                                                            + Print.PrintID
+                                                      );
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+                continue;
+            }
+
+            Debug.Log(request.downloadHandler.text);
+
+            PrintSettingsSummaryWrapper Response = JsonUtility.FromJson<PrintSettingsSummaryWrapper>
+                                                               (
+                                                                    request.downloadHandler.text
+                                                               );
+
+            if (Response == null)
+            {
+                continue;
+            }
+
+            if (Response.PrintSettings != null)
+            {
+                ConfirmedPrintSettings.PrintSettings.AddRange(Response.PrintSettings);
+            }
+        }
+
+        Debug.Log
+        (
+            "Downloaded "
+            + ConfirmedPrintSettings.PrintSettings.Count
+            + " Print Settings."
+        );
+
+        yield return StartCoroutine(GetPrintBills());
+    }
+
+
+    // DOWNLOAD ALL PRINT BILLS
+    IEnumerator GetPrintBills()
+    {
+        Debug.Log("Downloading Print Bills...");
+
+        foreach (PrintSummary Print in ConfirmedPrints.Prints)
+        {
+            UnityWebRequest request = UnityWebRequest.Get
+                                                      (
+                                                            "http://localhost:3000/bill/print/"
+                                                            + Print.PrintID
+                                                      );
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+                continue;
+            }
+
+            Debug.Log(request.downloadHandler.text);
+
+            PrintBillsSummaryWrapper Response = JsonUtility.FromJson<PrintBillsSummaryWrapper>
+                                                            (
+                                                                request.downloadHandler.text
+                                                            );
+
+            if (Response == null)
+            {
+                continue;
+            }
+
+            if (Response.PrintBills != null)
+            {
+                ConfirmedPrintBills.PrintBills.AddRange(Response.PrintBills);
+            }
+        }
+
+        Debug.Log
+        (
+            "Downloaded "
+            + ConfirmedPrintBills.PrintBills.Count
+            + " Print Bills."
+        );
+
+        BuildPrintDetails();
+
+        Debug.Log("Finished downloading everything.");
+    }
+
+
+
+    // BUILD PRINT DETAILS
+    void BuildPrintDetails()
+    {
+        foreach (OrderSummary Order in ConfirmedOrders.Orders)
+        {
+            Order.Prints.Clear();
+
+            foreach (PrintSummary Print in ConfirmedPrints.Prints)
+            {
+                if (Print.OrderID != Order.OrderID)
+                    continue;
+
+                PrintSettingsSummary Settings = null;
+
+                foreach (PrintSettingsSummary Setting in ConfirmedPrintSettings.PrintSettings)
+                {
+                    if (Setting.PrintID == Print.PrintID)
+                    {
+                        Settings = Setting;
+                        break;
+                    }
+                }
+
+                PrintBillsSummary Bill = null;
+
+                foreach (PrintBillsSummary BillInfo in ConfirmedPrintBills.PrintBills)
+                {
+                    if (BillInfo.PrintID == Print.PrintID)
+                    {
+                        Bill = BillInfo;
+                        break;
+                    }
+                }
+
+                if (Settings == null || Bill == null)
+                {
+                    continue;
+                }
+
+                PrintDetails Details = new PrintDetails();
+
+                Details.PrintNumber = Print.PrintNumber;
+
+                Details.PDFName = Print.PDFName;
+
+                Details.Pages = Print.TotalPages;
+
+                Details.Copies = Settings.Copies;
+
+                Details.PageSelection =
+                    (PageSelectionEnum)Settings.PageSelection;
+
+                Details.SideSelection =
+                    (SideSelectionEnum)Settings.SideSelection;
+
+                Details.CollatedOrNot =
+                    (CollatedOrNotEnum)Settings.Collated;
+
+                Details.Orientation =
+                    (OrientationEnum)Settings.Orientation;
+
+                Details.Margin =
+                    (MarginEnum)Settings.Margin;
+
+                Details.PagesPerSheet =
+                    (PagesPerSheetEnum)Settings.PagesPerSheet;
+
+                Details.Color =
+                    (ColorEnum)Settings.Color;
+
+                Details.EffectiveSheets =
+                    Bill.EffectiveSheets;
+
+                Details.BillAmount =
+                    Bill.BillAmount;
+
+                Order.Prints.Add(Details);
+
+                Details.PrintOrderDetails();
+            }
+        }
+
+        Debug.Log("Successfully built PrintDetails for every order.");
+
+        OrderStatusManagerScript.CreateOrderStatusPanels();
+
+        Scene3ManagerScript.RecentOrdersPage();
+    }
+
+
+
+    //Get All Stationeries
+    public StationerySummaryWrapper ConfirmedStationeries = new();
+    public void GetAllStationeries()
+    {
+        StartCoroutine(Coroutine_GetAllStationeries());
+    }
+    IEnumerator Coroutine_GetAllStationeries()
+    {
+        Debug.Log("Downloading Stationeries...");
+
+        ConfirmedStationeries.Stationeries = new StationerySummary[0];
+
+        UnityWebRequest request =
+            UnityWebRequest.Get("http://localhost:3000/stationeries");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Stationeries Download Failed : " + request.error);
+            yield break;
+        }
+
+#if UNITY_EDITOR
+        Debug.Log(request.downloadHandler.text);
+#endif
+
+        StationerySummaryWrapper response = JsonUtility.FromJson<StationerySummaryWrapper>
+                                                        (
+                                                            request.downloadHandler.text
+                                                        );
+
+        if (response == null)
+        {
+            Debug.LogError("Stationeries JSON Parsing Failed.");
+            yield break;
+        }
+
+        if (!response.Success)
+        {
+            Debug.LogError("Server Error : " + response.Message);
+            yield break;
+        }
+
+        ConfirmedStationeries.Stationeries =
+            response.Stationeries ?? new StationerySummary[0];
+
+        Debug.Log
+                (
+                    "Downloaded "
+                    + ConfirmedStationeries.Stationeries.Length
+                    + " Stationeries."
+                );
+    }
+}
