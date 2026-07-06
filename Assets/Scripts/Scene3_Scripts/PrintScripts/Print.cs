@@ -46,9 +46,9 @@ public class Print : MonoBehaviour
     {
         this.PrintDetailsObject = PrintData;
     }
-    public void SetOrderNumberInUI()
+    public void SetPrintNumberInUI()
     {
-        OrderNumberText.text = "#" + (PrintDetailsObject.PrintNumber + 1).ToString();
+        OrderNumberText.text = "Print #" + (PrintDetailsObject.PrintNumber + 1).ToString();
     }
     public PrintDetails GetOrderData()
     {

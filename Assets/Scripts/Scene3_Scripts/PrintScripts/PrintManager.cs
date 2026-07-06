@@ -51,7 +51,7 @@ public enum ColorEnum
 
 public class PrintDetails
 {
-    //public Print PrintScript;
+    public Print PrintScript;
 
     public int OrderID;
 
@@ -155,7 +155,7 @@ public class PrintManager : MonoBehaviour
 
         PrintDetails NewPrintDetails = new();
 
-        //NewOrderDetails.PrintScript = PrintScript;
+        NewPrintDetails.PrintScript = PrintScript;
         NewPrintDetails.PrintNumber = PrintDetailsList.Count;
 
         PrintDetailsList.Add(NewPrintDetails);
@@ -163,20 +163,20 @@ public class PrintManager : MonoBehaviour
         PrintScript.InitializeRequiredScripts(Scene3ManagerScript, this, PrintSettingsParent.transform);
         
         PrintScript.SetOrderData(NewPrintDetails);
-        PrintScript.SetOrderNumberInUI();
+        PrintScript.SetPrintNumberInUI();
 
         Debug.Log("Total Prints = " + PrintDetailsList.Count);
     }
 
 
-    public void RemoveOrder(Print OrderScript)
+    public void RemoveOrder(Print PrintScript)
     {
-        if (OrderScript == null)
+        if (PrintScript == null)
         {
             return;
         }
 
-        PrintDetailsList.Remove(OrderScript.GetOrderData());
+        PrintDetailsList.Remove(PrintScript.GetOrderData());
 
         ShiftOrders();
     }
@@ -185,8 +185,7 @@ public class PrintManager : MonoBehaviour
         for (int c1 = 0; c1 < PrintDetailsList.Count; c1++)
         {
             PrintDetailsList[c1].PrintNumber = c1;
-
-            //PrintDetailsList[c1].PrintScript.SetOrderNumberInUI();
+            PrintDetailsList[c1].PrintScript.SetPrintNumberInUI();
         }
 
         Debug.Log("OrdersDetailList count: " + PrintDetailsList.Count);

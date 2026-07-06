@@ -779,6 +779,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Previous (Button)
       objectReference: {fileID: 0}
+    - target: {fileID: 3508632859635439559, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3508632859635439559, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3508632859635439559, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3508632859635439559, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4278190080
+      objectReference: {fileID: 0}
     - target: {fileID: 4150292897173027369, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -870,6 +886,18 @@ PrefabInstance:
     - target: {fileID: 6815450802027641906, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643791975624563646, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_Color.b
+      value: 0.76862746
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643791975624563646, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_Color.g
+      value: 0.87058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643791975624563646, guid: 99575143a6ba66c44b4ded97c64b504d, type: 3}
+      propertyPath: m_Color.r
+      value: 0.94509804
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
