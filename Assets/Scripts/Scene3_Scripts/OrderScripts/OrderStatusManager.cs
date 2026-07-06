@@ -5,7 +5,8 @@ using UnityEngine;
 public class OrderStatusManager : MonoBehaviour
 {
     [Header("Scene3Manager")]
-    [SerializeField] Scene3Manager Scene3ManagerScript;
+    [SerializeField] Scene3Manager  Scene3ManagerScript;
+    [SerializeField] Scene3_Backend Scene3_BackendScript;
 
     [Header("PrintManager")]
     [SerializeField] PrintManager PrintManagerScript;
@@ -16,8 +17,6 @@ public class OrderStatusManager : MonoBehaviour
     [Header("Order Status")]
     [SerializeField] GameObject OrderStatusPrefab;
     [SerializeField] GameObject OrderStatusListParent;
-
-    [SerializeField] Scene3_Backend Scene3_BackendScript;
 
    
 
@@ -44,9 +43,10 @@ public class OrderStatusManager : MonoBehaviour
 
         OrderStatusScript.InitializeRequiredScripts(
                                                         Scene3ManagerScript, 
+                                                        Scene3_BackendScript,
                                                         PrintBillsManagerScript, 
                                                         this
-                                                    );
+                                                   );
 
         OrderStatusScript.SetOrderSummary(Order);
     }

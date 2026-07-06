@@ -1,35 +1,52 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 
 public class SelectStationery : MonoBehaviour
 {
     [SerializeField] Scene2Manager Scene2ManagerScript;
+    [SerializeField] Scene2_Backend Scene2_BackendScript;
+
+    [SerializeField] public TMP_Dropdown StationeryNameDropDown;
 
 
-    [SerializeField] TMP_Dropdown StationeryNameDropDown;
-
-    public enum StationeryNameEnum
-    {
-        SFIT_Borivali = 0
-    }
-
+    public string StationeryName;
 
 
     public void ClickedSubmitButton()
     {
-        if (Script1.CheckStationeryExistence((StationeryNameEnum)StationeryNameDropDown.value))
+        if (Scene2_BackendScript.StationeryResponse == null ||
+            Scene2_BackendScript.StationeryResponse.Stationeries == null)
         {
-            Scene2ManagerScript.DisableAllPanels();
-            Scene2ManagerScript.EnableSetProfileInfoPanel();
+            Debug.LogError("Stationery list has not been loaded.");
+            return;
         }
-        else
+
+        if (StationeryNameDropDown.value < 0 ||
+            StationeryNameDropDown.value >=
+            Scene2_BackendScript.StationeryResponse.Stationeries.Length)
         {
-            Debug.Log("Input valid Stationery.");
+            Debug.LogError("Invalid stationery selected.");
+            return;
         }
+
+        StationeryNameSummary selected =
+            Scene2_BackendScript.StationeryResponse.Stationeries[
+                StationeryNameDropDown.value
+            ];
+
+        Debug.Log
+               (
+                    $"Selected: {selected.StationeryName} (ID = {selected.StationeryID})"
+               );
+
+        // Store the selected StationeryID in the user's info.
+        Scene2_BackendScript.UserInfoObject.StationeryID = selected.StationeryID;
+        StationeryName = selected.StationeryName;
+
+        Scene2ManagerScript.DisableAllPanels();
+        Scene2ManagerScript.EnableSetProfileInfoPanel();
     }
-
-
 
     public void ClickedPreviousPage()
     {

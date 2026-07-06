@@ -5,24 +5,45 @@ using UnityEngine.SceneManagement;
 public class UpdateStationery : MonoBehaviour
 {
     [SerializeField] Scene4Manager Scene4ManagerScript;
+    [SerializeField] Scene4_Backend Scene4_BackendScript;
 
-    [SerializeField] TMP_Dropdown StationeryNameDropDown;
+    [SerializeField] public TMP_Dropdown StationeryNameDropDown;
+
+
+
+    public string StationeryName;
 
 
 
     public void ClickedSubmitButton()
     {
-        if (Script1.CheckStationeryExistence((SelectStationery.StationeryNameEnum)StationeryNameDropDown.value))
+        if (Scene4_BackendScript.StationeryResponse == null ||
+            Scene4_BackendScript.StationeryResponse.Stationeries == null)
         {
-            Scene4ManagerScript.DisableAllPanels();
-            Scene4ManagerScript.EnableProfileMenuPanel();
+            Debug.LogError("Stationery list has not been loaded.");
+            return;
+        }
 
-            Debug.Log("StationeryID = " + Script1.StationeryID);
-        }
-        else
+        if (StationeryNameDropDown.value < 0 ||
+            StationeryNameDropDown.value >=
+            Scene4_BackendScript.StationeryResponse.Stationeries.Length)
         {
-            Debug.Log("Input valid Stationery.");
+            Debug.LogError("Invalid stationery selected.");
+            return;
         }
+
+        StationeryNameSummary selected =
+            Scene4_BackendScript.StationeryResponse.Stationeries[
+                                                                    StationeryNameDropDown.value
+                                                                ];
+
+        Debug.Log
+               (
+                    $"Selected: {selected.StationeryName} (ID = {selected.StationeryID})"
+               );
+
+        StationeryName = selected.StationeryName;
+        StartCoroutine(Scene4_BackendScript.UpdateStationeryPreference(selected.StationeryID));
     }
 
     public void ClickedPreviousPage()

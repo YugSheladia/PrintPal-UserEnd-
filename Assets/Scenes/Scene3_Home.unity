@@ -1267,6 +1267,10 @@ PrefabInstance:
       value: -115
       objectReference: {fileID: 0}
     - target: {fileID: 2284583049427927257, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_text
+      value: Click here view your recent order status
+      objectReference: {fileID: 0}
+    - target: {fileID: 2284583049427927257, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_fontSize
       value: 30
       objectReference: {fileID: 0}
@@ -1289,6 +1293,22 @@ PrefabInstance:
     - target: {fileID: 3254663895003842148, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -99
+      objectReference: {fileID: 0}
+    - target: {fileID: 3536416445497756121, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 3536416445497756121, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -146
+      objectReference: {fileID: 0}
+    - target: {fileID: 3536416445497756121, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 807
+      objectReference: {fileID: 0}
+    - target: {fileID: 3681691315656931614, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_text
+      value: Click here to enter the PDFs you want to print
       objectReference: {fileID: 0}
     - target: {fileID: 3681691315656931614, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_fontSize
@@ -1488,19 +1508,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7153959573615993788, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1000
+      value: 900
       objectReference: {fileID: 0}
     - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_fontSize
-      value: 44.75
+      value: 48
       objectReference: {fileID: 0}
+    - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 2ccedcdec690c844895fdde29a27f45d, type: 2}
     - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_fontSizeMax
       value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -6584190823593576278, guid: 2ccedcdec690c844895fdde29a27f45d, type: 2}
+    - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 7428290494921177955, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7575935678615476181, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: Scene3ManagerScript
@@ -1548,7 +1584,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9121967887476321889, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1000
+      value: 900
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

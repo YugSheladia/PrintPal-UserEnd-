@@ -13,7 +13,8 @@ public class Password : MonoBehaviour
         Scene2_BackendScript.UserInfoObject.Password = PasswordInput.text;
 
         Scene2ManagerScript.DisableAllPanels();
-        Scene2ManagerScript.EnableSetStationeryNamePanel();
+
+        Scene2_BackendScript.GetStationeries();
     }
 
     public void ClickedPreviousPageButton()

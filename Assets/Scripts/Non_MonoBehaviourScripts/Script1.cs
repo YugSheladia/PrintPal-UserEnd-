@@ -17,6 +17,7 @@ public static class Script1
     public static string Password;
 
     public static int StationeryID;
+    public static string StationeryName;
 
 
     public static List<ConfirmedOrder> OrdersConfirmed = new List<ConfirmedOrder>();
@@ -45,20 +46,9 @@ public static class Script1
             UPILinkedPhoneNumber    = null;
             Password                = null;
             StationeryID            = -1;
+            StationeryName          = null;
         }
     }
 
 
-    public static bool CheckStationeryExistence(SelectStationery.StationeryNameEnum StationeryName)
-    {
-        if(StationeryName == SelectStationery.StationeryNameEnum.SFIT_Borivali)
-        {
-            StationeryID = 1;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
 }

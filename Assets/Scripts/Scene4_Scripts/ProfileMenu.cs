@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 public class ProfileMenu : MonoBehaviour
 {
     [SerializeField] Scene4Manager Scene4ManagerScript;
+    [SerializeField] Scene4_Backend Scene4_BackendScript;
+
     [SerializeField] ViewProfileInfo ViewProfileInfoScript;
     
 
@@ -19,8 +21,7 @@ public class ProfileMenu : MonoBehaviour
 
     public void ClickedStationery()
     {
-        Scene4ManagerScript.DisableAllPanels();
-        Scene4ManagerScript.EnableUpdateStationeryPanel();
+        Scene4_BackendScript.GetStationeries();
     }
 
 

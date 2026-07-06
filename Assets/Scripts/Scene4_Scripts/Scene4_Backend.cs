@@ -1,8 +1,13 @@
 using System.Collections;
+using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
 
+
+//Used for updating user info through ProfileMenu -> View Profile -> Edit.
+[System.Serializable]
 public class UpdatedUserInfo
 {
     public string PhoneNumber;
@@ -12,7 +17,7 @@ public class UpdatedUserInfo
     public string Username;
 }
 
-
+[System.Serializable]
 public class UserInfoWrapper
 {
     public bool Success;
@@ -21,11 +26,40 @@ public class UserInfoWrapper
 
 
 
+
+
+//Used for updating stationery info through ProfileMenu -> Stationery.
+[System.Serializable]
+public class UpdateStationeryPreferenceRequest
+{
+    public int UserID;
+    public int StationeryPreference;
+}
+
+[System.Serializable]
+public class UpdateStationeryPreferenceResponse
+{
+    public bool Success;
+    public string Message;
+}
+
+
+
+
+
 public class Scene4_Backend : MonoBehaviour
 {
+    [SerializeField] Scene4Manager Scene4ManagerScript;
+
     [SerializeField] ViewProfileInfo ViewProfileInfoScript;
     [SerializeField] UpdateProfileInfo UpdateProfileInfoScript;
+    [SerializeField] UpdateStationery UpdateStationeryScript;
 
+
+
+
+
+    //Used for updating user info through ProfileMenu -> View Profile -> Edit.
     UpdatedUserInfo UpdatedUserInfoObject;
     public void StartCoroutine_UpdateUserInfoInServer(UpdatedUserInfo UpdatedUserInfoObject)
     {
@@ -76,6 +110,14 @@ public class Scene4_Backend : MonoBehaviour
 
 
 
+
+
+
+    //Used for displaying user info in
+    //1. Profile Menu -> View Profile
+    //&
+    //2. Profile Menu -> View Profile -> Update Profile.
+    
     UserInfoWrapper UserInfoWrapperObject;
     public void StartCoroutine_GetUserInfoFromServer()
     {
@@ -112,6 +154,140 @@ public class Scene4_Backend : MonoBehaviour
         else
         {
             Debug.LogError(request.error);
+        }
+    }
+
+
+
+
+
+
+
+
+    //Used for displaying the names of all registered stationeries.
+    public GetStationeriesResponse StationeryResponse;
+    public void GetStationeries()
+    {
+        StartCoroutine(Coroutine_GetStationeries());
+    }
+    IEnumerator Coroutine_GetStationeries()
+    {
+        UnityWebRequest request = new UnityWebRequest(
+                                                        "http://localhost:3000/stationeries",
+                                                        "GET"
+                                                     );
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+
+        Debug.Log(request.downloadHandler.text);
+
+        StationeryResponse =
+            JsonUtility.FromJson<GetStationeriesResponse>(
+                                                             request.downloadHandler.text
+                                                         );
+
+        if (!StationeryResponse.Success)
+        {
+            Debug.Log("Failed to fetch stationeries.");
+            yield break;
+        }
+
+        if (StationeryResponse.Stationeries == null
+            ||
+            StationeryResponse.Stationeries.Length == 0)
+        {
+            Debug.Log("No stationeries found.");
+            yield break;
+        }
+
+        PopulateDropdown();
+
+        Scene4ManagerScript.DisableAllPanels();
+        Scene4ManagerScript.EnableUpdateStationeryPanel();
+    }
+    void PopulateDropdown()
+    {
+        TMP_Dropdown dropdown = UpdateStationeryScript.StationeryNameDropDown;
+
+        dropdown.ClearOptions();
+
+        foreach (StationeryNameSummary stationery in StationeryResponse.Stationeries)
+        {
+            dropdown.options.Add(
+                new TMP_Dropdown.OptionData(stationery.StationeryName)
+            );
+        }
+
+        dropdown.RefreshShownValue();
+    }
+
+
+
+
+
+
+    //Used for updating stationery info through ProfileMenu -> Stationery.
+    UpdateStationeryPreferenceRequest Request = new UpdateStationeryPreferenceRequest();
+    public IEnumerator UpdateStationeryPreference(int StationeryID)
+    {
+        Debug.Log("Chosen StationeryID = " + StationeryID);
+        Debug.Log("User ID = " + Script1.UserID);
+
+        Request.StationeryPreference = StationeryID;
+        Request.UserID = Script1.UserID;
+
+        string json = JsonUtility.ToJson(Request);
+
+        byte[] raw = Encoding.UTF8.GetBytes(json);
+
+        UnityWebRequest request = new UnityWebRequest(
+                                                        "http://localhost:3000/update-stationeryPreference",
+                                                        "POST"
+                                                      );
+
+        request.uploadHandler = new UploadHandlerRaw(raw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader(
+                                    "Content-Type",
+                                    "application/json"
+                                );
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+
+        UpdateStationeryPreferenceResponse response =
+            JsonUtility.FromJson<UpdateStationeryPreferenceResponse>(
+                                                                        request.downloadHandler.text
+                                                                    );
+
+        if (response.Success)
+        {
+            Debug.Log(response.Message);
+
+            Script1.StationeryID = StationeryID;
+            Script1.StationeryName = UpdateStationeryScript.StationeryName;
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableProfileMenuPanel();
+        }
+        else
+        {
+            Debug.LogError(response.Message);
+            UpdateStationeryScript.StationeryName = null;
         }
     }
 }

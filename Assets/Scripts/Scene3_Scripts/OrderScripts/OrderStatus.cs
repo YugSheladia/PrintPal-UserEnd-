@@ -2,10 +2,13 @@
 
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class OrderStatus : MonoBehaviour
 {
-    Scene3Manager       Scene3ManagerScript;
+    Scene3Manager  Scene3ManagerScript;
+    Scene3_Backend Scene3_BackendScript;
+
     PrintBillsManager   PrintBillsManagerScript;
     OrderStatusManager  OrderStatusManagerScript;
 
@@ -17,12 +20,29 @@ public class OrderStatus : MonoBehaviour
 
 
     [Header("UI")]
+    [SerializeField] TMP_Text OrderStatusText;
+    [SerializeField] TMP_Text StatusTimeStampText;
+    [SerializeField] public TMP_Text StationeryNameText;
     [SerializeField] TMP_Text OrderIDText;
-    [SerializeField] TMP_Text ApproximateTimeLeftText;
+    [SerializeField] TMP_Text OrderOTPText;
+
+    [SerializeField] private Image ViewDetailsObject;
+    [SerializeField] private Image StatusIndicator;
+
 
     public OrderSummary OrderSummaryObject;
 
     GameObject OrderStatusInfoObject;
+
+    enum OrderStatusEnum
+    {
+        Pending,
+        Completed,
+        Collected,
+        Deleted
+    }
+
+    OrderStatusEnum orderStatusEnum;
 
     
 
@@ -31,11 +51,14 @@ public class OrderStatus : MonoBehaviour
     //Called by OrderStatusManager.
     public void InitializeRequiredScripts  (
                                             Scene3Manager       Scene3ManagerScript,
+                                            Scene3_Backend      Scene3_BackendScript,
                                             PrintBillsManager   PrintBillsManagerScript,
                                             OrderStatusManager  OrderStatusManagerScript
                                            )
     {
-        this.Scene3ManagerScript        = Scene3ManagerScript;
+        this.Scene3ManagerScript    = Scene3ManagerScript;
+        this.Scene3_BackendScript   = Scene3_BackendScript;
+
         this.PrintBillsManagerScript    = PrintBillsManagerScript;
         this.OrderStatusManagerScript   = OrderStatusManagerScript;
     }
@@ -47,15 +70,63 @@ public class OrderStatus : MonoBehaviour
     }
     private void UpdateUI()
     {
-        if (OrderIDText != null)
+        orderStatusEnum = (OrderStatusEnum)OrderSummaryObject.Status;
+
+        switch (orderStatusEnum)
         {
-            OrderIDText.text = OrderSummaryObject.OrderID.ToString();
+            case OrderStatusEnum.Pending:
+                OrderStatusText.text = "Queued for Printing";
+
+                StatusTimeStampText.text = "Created at : " + OrderSummaryObject.CreatedAt.ToString();
+
+                StatusIndicator.color = new Color32(246, 59, 57, 200);
+                OrderStatusText.color = new Color32(246, 59, 57, 200);
+                ViewDetailsObject.color = new Color32(246, 59, 57, 200);
+                
+                break;
+
+            case OrderStatusEnum.Completed:
+                OrderStatusText.text = "Ready for Pickup";
+
+                StatusTimeStampText.text = "Completed at : " + OrderSummaryObject.CompletedAt.ToString();
+
+                StatusIndicator.color = new Color32(245, 207, 73, 230);
+                OrderStatusText.color = new Color32(245, 207, 73, 230);
+                ViewDetailsObject.color = new Color32(245, 207, 73, 230);
+                
+                break;
+
+            case OrderStatusEnum.Collected:
+                OrderStatusText.text = "Collected";
+
+                StatusTimeStampText.text = "Collected at : " + OrderSummaryObject.CollectedAt.ToString();
+
+                StatusIndicator.color = new Color32(2, 141, 26, 220);
+                OrderStatusText.color = new Color32(2, 141, 26, 220);
+                ViewDetailsObject.color = new Color32(2, 141, 26, 220);
+                
+                break;
+
+            case OrderStatusEnum.Deleted:
+                OrderStatusText.text = "Archived";
+
+                StatusTimeStampText.text = "Archived by Stationery at : " + OrderSummaryObject.DeletedAt.ToString();
+
+                StatusIndicator.color = new Color32(124, 124, 124, 255);
+                OrderStatusText.color = new Color32(36, 36, 36, 150);
+                ViewDetailsObject.color = new Color32(36, 36, 36, 150);
+                
+                break;
+
+            default:
+                break;
         }
 
-        if (ApproximateTimeLeftText != null)
-        {
-            ApproximateTimeLeftText.text = OrderSummaryObject.ApproximateTimeLeft + " min";
-        }
+        Scene3_BackendScript.GetStationeryNameFromOrderID(OrderSummaryObject.OrderID, this);
+
+        OrderIDText.text = OrderSummaryObject.OrderID.ToString();
+
+        OrderOTPText.text = OrderSummaryObject.OrderOTP.ToString();
     }
     
 

@@ -30,6 +30,8 @@ public class SetProfileInfo : MonoBehaviour
     {
         Scene2ManagerScript.DisableAllPanels();
         Scene2ManagerScript.EnableSetStationeryNamePanel();
+
+        Scene2_BackendScript.GetStationeries();
     }
     
     public IEnumerator SaveProfile()
@@ -38,8 +40,6 @@ public class SetProfileInfo : MonoBehaviour
         UserUPIPhoneNumber  = UPIPhoneField.text.Trim();
         UserEmail           = EmailField.text.Trim();
         Username            = UsernameField.text.Trim();
-
-        Scene2_BackendScript.UserInfoObject.StationeryID = Script1.StationeryID;
 
         Scene2_BackendScript.UserInfoObject.Name        = UserActualName;
         Scene2_BackendScript.UserInfoObject.UPINumber   = UserUPIPhoneNumber;

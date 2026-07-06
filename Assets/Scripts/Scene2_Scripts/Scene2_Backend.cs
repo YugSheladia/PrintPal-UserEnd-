@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -14,6 +15,9 @@ public class PhoneNumberAvailabilityResponse
 
 
 
+
+
+//Used for account creation and phone number availability check.
 [System.Serializable]
 public class UserInfo
 {
@@ -46,13 +50,6 @@ public class UserInfo
 }
 
 [System.Serializable]
-public class UserInfoResponse
-{
-    public bool Success;
-    public UserInfo UserInfo;
-} 
-
-[System.Serializable]
 public class UserInfoRecieved
 {
     public bool     Success;
@@ -63,6 +60,8 @@ public class UserInfoRecieved
 
 
 
+
+//Used for login verification.
 [System.Serializable]
 public class LoginVerificationResponseFromServer
 {
@@ -74,10 +73,34 @@ public class LoginVerificationResponseFromServer
 
 
 
+
+
+//Used for getting the ID and name of all registered stationeries.
+[System.Serializable] 
+public class StationeryNameSummary
+{
+    public int StationeryID;
+    public string StationeryName;
+}
+
+[System.Serializable]
+public class GetStationeriesResponse
+{
+    public bool Success;
+    public StationeryNameSummary[] Stationeries;
+}
+
+
+
+
+
+//==================================
+//Main class
+//==================================
 public class Scene2_Backend : MonoBehaviour
 {
     [SerializeField] Scene2Manager Scene2ManagerScript;
-
+    [SerializeField] SelectStationery SelectStationeryScript;
 
     [SerializeField] Login LoginScript;
 
@@ -169,12 +192,14 @@ public class Scene2_Backend : MonoBehaviour
             UserInfoObject.UserID = UserInfoRecievedObject.UserID;
 
             Script1.SetUserInfo(UserInfoObject);
+            Script1.StationeryName = SelectStationeryScript.StationeryName;
 
             UserInfoObject.PrintUserInfo();
         }
         else
         {
             Debug.LogError(request.error);
+            SelectStationeryScript.StationeryName = null;
         }
     }
 
@@ -221,16 +246,11 @@ public class Scene2_Backend : MonoBehaviour
 
             if(ServerResponseObject.Success == true)
             {
-                //Load info about the user.
-
                 Debug.Log("User info received");
 
                 Script1.SetUserInfo(ServerResponseObject.User);
 
                 LoginScript.LoadHomePage();
-
-                //StartCoroutine(GetSpecificUserInfoFromServer());
-
 
                 Debug.Log("Unity - Sucessfully logged in.");
             }
@@ -244,35 +264,71 @@ public class Scene2_Backend : MonoBehaviour
             Debug.LogError(request.error);
         }
     }
-    IEnumerator GetSpecificUserInfoFromServer()
+
+
+
+
+    //Getting all the registers stationery's name and ID from server, and displaying in in the Stationery dropdown.
+    public GetStationeriesResponse StationeryResponse = new GetStationeriesResponse();
+    public void GetStationeries()
     {
-        UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/userInfo/" + LoginInfoObject.PhoneNumber);
+        StartCoroutine(Coroutine_GetStationeries());
+    }
+    IEnumerator Coroutine_GetStationeries()
+    {
+        UnityWebRequest request = new UnityWebRequest(
+                                                        "http://localhost:3000/stationeries",
+                                                        "GET"
+                                                     );
+
+        request.downloadHandler = new DownloadHandlerBuffer();
 
         yield return request.SendWebRequest();
 
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            string ServerResponseJSON = request.downloadHandler.text;
-            Debug.Log("Raw Server response = \n" + ServerResponseJSON);
-
-            UserInfoResponse ServerResponseObject = JsonUtility.FromJson<UserInfoResponse>(ServerResponseJSON);
-
-            if (ServerResponseObject.Success)
-            {
-                Debug.Log("User info received");
-
-                Script1.SetUserInfo(ServerResponseObject.UserInfo);
-
-                LoginScript.LoadHomePage();
-            }
-            else
-            {
-                Debug.LogError("User not found");
-            }
-        }
-        else
+        if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+            yield break;
         }
+
+        Debug.Log(request.downloadHandler.text);
+        
+        StationeryResponse =
+            JsonUtility.FromJson<GetStationeriesResponse>(
+                                                             request.downloadHandler.text
+                                                         );
+
+        if (!StationeryResponse.Success)
+        {
+            Debug.Log("Failed to fetch stationeries.");
+            yield break;
+        }
+
+        if (StationeryResponse.Stationeries == null 
+            ||
+            StationeryResponse.Stationeries.Length == 0)
+        {
+            Debug.Log("No stationeries found.");
+            yield break;
+        }
+
+        PopulateDropdown();
+
+        Scene2ManagerScript.EnableSetStationeryNamePanel();
+    }
+    void PopulateDropdown()
+    {
+        TMP_Dropdown dropdown = SelectStationeryScript.StationeryNameDropDown;
+
+        dropdown.ClearOptions();
+
+        foreach (StationeryNameSummary stationery in StationeryResponse.Stationeries)
+        {
+            dropdown.options.Add(
+                new TMP_Dropdown.OptionData(stationery.StationeryName)
+            );
+        }
+
+        dropdown.RefreshShownValue();
     }
 }

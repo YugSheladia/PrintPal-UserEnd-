@@ -6,9 +6,9 @@ using UnityEngine.Networking;
 
 
 
-//==================================================
+//==================================
 // CREATE ORDER CLASSES
-//==================================================
+//==================================
 [System.Serializable]
 public class CreateOrderRequest
 {
@@ -56,9 +56,12 @@ public class CreateOrderResponse
 
 
 
-//==================================================
+
+//=======================================================
+//Recieve all possible info about an issued order.
+//=======================================================
+
 // ORDERS TABLE
-//==================================================
 [System.Serializable]
 public class OrderSummary
 {
@@ -71,9 +74,12 @@ public class OrderSummary
 
     public float FinalAmount;
 
-    public string OrderStatus;
+    public int Status;
 
     public string CreatedAt;
+    public string CompletedAt;
+    public string CollectedAt;
+    public string DeletedAt;
 
     public int Completed;
 
@@ -89,10 +95,7 @@ public class OrderSummaryWrapper
 }
 
 
-
-//==================================================
 // PRINTS TABLE
-//==================================================
 [System.Serializable]
 public class PrintSummary
 {
@@ -114,10 +117,7 @@ public class PrintSummaryWrapper
 }
 
 
-
-//==================================================
 // PRINT SETTINGS TABLE
-//==================================================
 [System.Serializable]
 public class PrintSettingsSummary
 {
@@ -143,10 +143,7 @@ public class PrintSettingsSummaryWrapper
 }
 
 
-
-//==================================================
 // PRINT BILLS TABLE
-//==================================================
 [System.Serializable]
 public class PrintBillsSummary
 {
@@ -176,10 +173,7 @@ public class PrintBillsSummaryWrapper
 }
 
 
-
-//==================================================
 // Stationery TABLE
-//==================================================
 [System.Serializable]
 public class StationerySummary
 {
@@ -209,6 +203,7 @@ public class StationerySummaryWrapper
 
 
 
+
 //==================================================
 // MAIN CLASS
 //==================================================
@@ -221,33 +216,32 @@ public class Scene3_Backend : MonoBehaviour
     
 
 
-
+    //Creating an Order Request.
     CreateOrderRequest CurrentOrderRequest;
 
+
+    //Creating Wrapper objects.
     public OrderSummaryWrapper ConfirmedOrders = new();
-
     public PrintSummaryWrapper ConfirmedPrints = new();
-
     public PrintSettingsSummaryWrapper ConfirmedPrintSettings = new();
-
     public PrintBillsSummaryWrapper ConfirmedPrintBills = new();
 
 
 
-    // CREATE ORDER
+    // CrateOrder function initialized Order Request, and then calls SubmitPrintSettingsToServer.
     public void CreateOrder()
     {
         CreateOrderRequest Request = new();
 
+        Debug.Log("Inside Create Order, UserID = " + Script1.UserID);
         Request.UserID = Script1.UserID;
 
         Request.FinalAmount = PrintBillsManagerScript.FinalBillAmount;
 
+        Debug.Log("Inside Create Order, StationeryID = " + Script1.StationeryID);
         Request.StationeryID = Script1.StationeryID;
 
         Request.Prints = new List<PrintDTO>();
-
-
 
         foreach (PrintDetails Print in PrintManagerScript.PrintDetailsList)
         {
@@ -277,13 +271,19 @@ public class Scene3_Backend : MonoBehaviour
 
         CurrentOrderRequest = Request;
 
+        Debug.Log("1 = " + CurrentOrderRequest.StationeryID);
+        Debug.Log("2 = " +  CurrentOrderRequest.UserID);
+
+        Debug.Log("1 = " + Script1.StationeryID);
+        Debug.Log("2 = " + Script1.UserID);
+
         StartCoroutine(SubmitPrintSettingsToServer());
     }
     IEnumerator SubmitPrintSettingsToServer()
     {
-        Debug.Log("StationeryID = " + Script1.StationeryID);
-
         string json = JsonUtility.ToJson(CurrentOrderRequest);
+
+        Debug.Log("JSON = " + json);
 
         byte[] raw = System.Text.Encoding.UTF8.GetBytes(json);
 
@@ -401,9 +401,6 @@ public class Scene3_Backend : MonoBehaviour
 
         Debug.Log("Finished downloading Orders.");
     }
-
-
-    // DOWNLOAD ALL PRINTS
     IEnumerator GetPrints()
     {
         Debug.Log("Downloading Prints...");
@@ -453,9 +450,6 @@ public class Scene3_Backend : MonoBehaviour
 
         Debug.Log("Finished downloading Prints.");
     }
-
-
-    // DOWNLOAD ALL PRINT SETTINGS
     IEnumerator GetPrintSettings()
     {
         Debug.Log("Downloading Print Settings...");
@@ -503,9 +497,6 @@ public class Scene3_Backend : MonoBehaviour
 
         yield return StartCoroutine(GetPrintBills());
     }
-
-
-    // DOWNLOAD ALL PRINT BILLS
     IEnumerator GetPrintBills()
     {
         Debug.Log("Downloading Print Bills...");
@@ -556,8 +547,7 @@ public class Scene3_Backend : MonoBehaviour
     }
 
 
-
-    // BUILD PRINT DETAILS
+    //Converting all orders recieved from server into PrintDetails type, for easy creation of OrderPanels.
     void BuildPrintDetails()
     {
         foreach (OrderSummary Order in ConfirmedOrders.Orders)
@@ -648,58 +638,68 @@ public class Scene3_Backend : MonoBehaviour
 
 
 
-    //Get All Stationeries
-    public StationerySummaryWrapper ConfirmedStationeries = new();
-    public void GetAllStationeries()
+
+
+
+
+
+    [System.Serializable]
+    public class GetStationeryNameRequest
     {
-        StartCoroutine(Coroutine_GetAllStationeries());
+        public int OrderID;
     }
-    IEnumerator Coroutine_GetAllStationeries()
+
+    [System.Serializable]
+    public class GetStationeryNameResponse
     {
-        Debug.Log("Downloading Stationeries...");
+        public bool Success;
+        public string Message;
+        public string StationeryName;
+    }
 
-        ConfirmedStationeries.Stationeries = new StationerySummary[0];
-
-        UnityWebRequest request =
-            UnityWebRequest.Get("http://localhost:3000/stationeries");
-
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityWebRequest.Result.Success)
+    public void GetStationeryNameFromOrderID(int OrderID, OrderStatus OrderStatusScript)
+    {
+        StartCoroutine(GetStationeryNameFromServer(OrderID, OrderStatusScript));
+    }
+    IEnumerator GetStationeryNameFromServer(int OrderID, OrderStatus OrderStatusScript)
+    {
+        GetStationeryNameRequest requestData = new GetStationeryNameRequest
         {
-            Debug.LogError("Stationeries Download Failed : " + request.error);
-            yield break;
-        }
+            OrderID = OrderID
+        };
 
-#if UNITY_EDITOR
-        Debug.Log(request.downloadHandler.text);
-#endif
+        string json = JsonUtility.ToJson(requestData);
 
-        StationerySummaryWrapper response = JsonUtility.FromJson<StationerySummaryWrapper>
-                                                        (
-                                                            request.downloadHandler.text
-                                                        );
-
-        if (response == null)
+        using (UnityWebRequest request = new UnityWebRequest("http://localhost:3000/order/getStationeryName", "POST"))
         {
-            Debug.LogError("Stationeries JSON Parsing Failed.");
-            yield break;
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+                yield break;
+            }
+
+            GetStationeryNameResponse response =
+                JsonUtility.FromJson<GetStationeryNameResponse>(request.downloadHandler.text);
+
+            if (response.Success)
+            {
+                Debug.Log("Stationery Name: " + response.StationeryName);
+
+                OrderStatusScript.StationeryNameText.text = response.StationeryName;
+            }
+            else
+            {
+                Debug.LogError(response.Message);
+            }
         }
-
-        if (!response.Success)
-        {
-            Debug.LogError("Server Error : " + response.Message);
-            yield break;
-        }
-
-        ConfirmedStationeries.Stationeries =
-            response.Stationeries ?? new StationerySummary[0];
-
-        Debug.Log
-                (
-                    "Downloaded "
-                    + ConfirmedStationeries.Stationeries.Length
-                    + " Stationeries."
-                );
     }
 }
