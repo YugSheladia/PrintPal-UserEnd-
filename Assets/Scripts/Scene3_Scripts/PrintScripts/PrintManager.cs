@@ -54,9 +54,12 @@ public class PrintDetails
     public Print PrintScript;
 
     public int OrderID;
+    public int PrintID;
 
     public int      PrintNumber;
     public string   PDFName;
+
+    public string PrintFilePath;
 
     public PageSelectionEnum    PageSelection   = PageSelectionEnum.AllPages;
     public SideSelectionEnum    SideSelection   = SideSelectionEnum.SingleSided;
@@ -118,8 +121,8 @@ public class PrintDetails
 public class PrintManager : MonoBehaviour
 {
     [Header("Scene3Manager stuff")]
-    [SerializeField] GameObject Scene3ManagerObject;
-    Scene3Manager Scene3ManagerScript;
+    [SerializeField] Scene3Manager Scene3ManagerScript;
+    [SerializeField] Scene3_Backend Scene3_BackendScript;
 
 
     [Header("Order stuff")]
@@ -132,20 +135,13 @@ public class PrintManager : MonoBehaviour
 
 
     [Header("PrintBillsManager stuff")]
-    [SerializeField] GameObject PrintBillsManagerObject;
-    PrintBillsManager PrintBillsManagerScript;
+    [SerializeField] PrintBillsManager PrintBillsManagerScript;
 
 
     [Header("Other stuff")]
     public List<PrintDetails> PrintDetailsList = new();
 
 
-    private void Start()
-    {
-        Scene3ManagerScript = Scene3ManagerObject.GetComponent<Scene3Manager>();
-
-        PrintBillsManagerScript = PrintBillsManagerObject.GetComponent<PrintBillsManager>();
-    }
 
 
     public void AddOrder()
@@ -160,13 +156,14 @@ public class PrintManager : MonoBehaviour
 
         PrintDetailsList.Add(NewPrintDetails);
 
-        PrintScript.InitializeRequiredScripts(Scene3ManagerScript, this, PrintSettingsParent.transform);
+        PrintScript.InitializeRequiredScripts(Scene3ManagerScript, Scene3_BackendScript, this, PrintSettingsParent.transform);
         
         PrintScript.SetOrderData(NewPrintDetails);
         PrintScript.SetPrintNumberInUI();
 
         Debug.Log("Total Prints = " + PrintDetailsList.Count);
     }
+
 
 
     public void RemoveOrder(Print PrintScript)
@@ -192,6 +189,7 @@ public class PrintManager : MonoBehaviour
     }
 
 
+
     public void ClickedPrintButton()
     {
         if (PrintDetailsList.Count <= 0)
@@ -203,12 +201,11 @@ public class PrintManager : MonoBehaviour
             PrintBillsManagerScript.CreateBills();    
         }
     }
-
-
     public void ClickedPreviousPageButton()
     {
         Scene3ManagerScript.HomePage();
     }
+
 
 
     public void ClearOrders()

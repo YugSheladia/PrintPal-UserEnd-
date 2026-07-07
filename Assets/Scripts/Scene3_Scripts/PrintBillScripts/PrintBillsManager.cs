@@ -7,6 +7,7 @@ public class PrintBillsManager : MonoBehaviour
 {
     [Header("Scene3Manager stuff")]
     [SerializeField] Scene3Manager Scene3ManagerScript;
+    [SerializeField] Scene3_Backend Scene3_BackendScript;
 
     [Header("OrderManager stuff")]
     [SerializeField] PrintManager PrintManagerScript;
@@ -19,9 +20,6 @@ public class PrintBillsManager : MonoBehaviour
 
     GameObject FinalBillObject;
     Print_FinalBill FinalBillScript;
-
-
-    [SerializeField] Scene3_Backend Scene3_BackendScript;
 
     public float FinalBillAmount;
 
@@ -90,6 +88,7 @@ public class PrintBillsManager : MonoBehaviour
 
     public void ClickedPayButton()
     {
+        Scene3ManagerScript.EnableInvisiblePanel();
         Debug.Log("Clicked Pay button");
 
         Scene3_BackendScript.CreateOrder();
@@ -101,6 +100,8 @@ public class PrintBillsManager : MonoBehaviour
 
         PrintManagerScript.ClearOrders();
 
+
+        Scene3ManagerScript.DisableAllPanels();
         Scene3ManagerScript.HomePage();
     }
 

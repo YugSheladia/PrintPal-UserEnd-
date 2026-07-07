@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -23,8 +24,10 @@ public class CreateOrderRequest
 public class PrintDTO
 {
     public int PrintNumber;
+    public int PrintID;
 
     public string PDFName;
+    public string PrintFilePath;
 
     public int Pages;
     public int Copies;
@@ -50,6 +53,8 @@ public class CreateOrderResponse
     public int OTP;
 
     public int ApproximateTimeLeft;
+
+    public PrintSummary[] Prints;
 
     public string Message;
 }
@@ -202,6 +207,15 @@ public class StationerySummaryWrapper
 
 
 
+[System.Serializable]
+public class UploadResponse
+{
+    public bool Success;
+    public int PrintID;
+    public string Message;
+}
+
+
 
 
 //==================================================
@@ -248,8 +262,10 @@ public class Scene3_Backend : MonoBehaviour
             PrintDTO dto = new PrintDTO();
 
             dto.PrintNumber = Print.PrintNumber;
+            //dto.PrintID = Print.PrintID;
 
             dto.PDFName = Print.PDFName;
+            dto.PrintFilePath = Print.PrintFilePath;
 
             dto.Pages = Print.Pages;
 
@@ -271,13 +287,8 @@ public class Scene3_Backend : MonoBehaviour
 
         CurrentOrderRequest = Request;
 
-        Debug.Log("1 = " + CurrentOrderRequest.StationeryID);
-        Debug.Log("2 = " +  CurrentOrderRequest.UserID);
-
-        Debug.Log("1 = " + Script1.StationeryID);
-        Debug.Log("2 = " + Script1.UserID);
-
         StartCoroutine(SubmitPrintSettingsToServer());
+        //StartCoroutine(UploadAllPDFs());
     }
     IEnumerator SubmitPrintSettingsToServer()
     {
@@ -319,8 +330,6 @@ public class Scene3_Backend : MonoBehaviour
                                                         request.downloadHandler.text
                                                    );
 
-
-
         if (!Response.Success)
         {
             Debug.LogError(Response.Message);
@@ -342,6 +351,60 @@ public class Scene3_Backend : MonoBehaviour
         PrintBillsManagerScript.ConfirmOrders();
     }
 
+
+
+    /*
+    //Uploading PDFs
+    IEnumerator UploadAllPDFs()
+    {
+        foreach (PrintDetails print in PrintManagerScript.PrintDetailsList)
+        {
+            yield return StartCoroutine(UploadPDF(Print, ?));
+        }
+
+        StartCoroutine(SubmitPrintSettingsToServer());
+    }
+    IEnumerator UploadPDF(PrintDetails Print, int PrintID)
+    {
+        byte[] pdfBytes = File.ReadAllBytes(Print.PrintFilePath);
+
+        WWWForm form = new WWWForm();
+
+        form.AddField("PrintID", PrintID);
+
+        form.AddBinaryData
+        (
+            "PDF",
+            pdfBytes,
+            Path.GetFileName(Print.PrintFilePath),
+            "application/pdf"
+        );
+
+        using (UnityWebRequest request =
+               UnityWebRequest.Post("http://localhost:3000/upload/print", form))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+                Debug.LogError(request.downloadHandler.text);
+                yield break;
+            }
+
+            UploadResponse response =
+                JsonUtility.FromJson<UploadResponse>(request.downloadHandler.text);
+
+            if (!response.Success)
+            {
+                Debug.LogError("Upload failed.");
+                yield break;
+            }
+
+            Debug.Log("Uploaded PDF for PrintID = " + response.PrintID);
+        }
+    }
+    */
 
 
 
@@ -642,7 +705,7 @@ public class Scene3_Backend : MonoBehaviour
 
 
 
-
+    //Gettings the name of the stationery to which the order is assigned.
     [System.Serializable]
     public class GetStationeryNameRequest
     {

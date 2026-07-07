@@ -6,6 +6,7 @@ public class Scene3Manager : MonoBehaviour
 {
     [Header("Scene3 Manager stuff")]
     [SerializeField] GameObject BlankPanelObject;
+    [SerializeField] GameObject InvisiblePanel;
 
     [Header("HomePage")]
     [SerializeField] GameObject HomePageObject;
@@ -33,6 +34,7 @@ public class Scene3Manager : MonoBehaviour
 
     public void HomePage()
     {
+        Debug.Log("Called HomePage()");
         DisableAllPanels();
         EnableHomePage();
         
@@ -54,6 +56,10 @@ public class Scene3Manager : MonoBehaviour
 
     public void DisableAllPanels()
     {
+        Debug.Log("Called DisableAllPanels");
+        DisableBlank();
+        DisableInvisiblePanel();
+
         DisableHomePage();
         DisablePrintManager();
         DisablePrintBillsManager();
@@ -70,9 +76,20 @@ public class Scene3Manager : MonoBehaviour
     public void DisableBlank()
     {
         BlankPanelObject.SetActive(false);
+    } 
+    public void EnableInvisiblePanel()
+    {
+        InvisiblePanel.SetActive(true);
     }
+    public void DisableInvisiblePanel()
+    {
+        InvisiblePanel.SetActive(false);
+    }
+
+
     public void EnableHomePage()
     {
+        Debug.Log("Called EnableHomePage()");
         HomePageObject.SetActive(true);
     }
     public void DisableHomePage()

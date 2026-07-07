@@ -8,14 +8,15 @@ public class Print : MonoBehaviour
 {
     [Header("Scene5Manager stuff")]
     Scene3Manager Scene3ManagerScript;
+    Scene3_Backend Scene3_BackendScript;
 
 
-    [Header("OrderManager stuff")]
+    [Header("PrintManager stuff")]
     PrintManager PrintManagerScript;
 
 
-    [Header("Order stuff")]
-    [SerializeField] private    TMP_Text        OrderNumberText;
+    [Header("Print stuff")]
+    [SerializeField] private    TMP_Text        PrintNumberText;
     [SerializeField] public     TMP_InputField  PDFFileNameInputField;
 
 
@@ -31,14 +32,17 @@ public class Print : MonoBehaviour
 
 
 
+
     //functions called by OrderManager ->
     public void InitializeRequiredScripts(
-                                            Scene3Manager Scene3ManagerScript, 
+                                            Scene3Manager Scene3ManagerScript,
+                                            Scene3_Backend Scene3_BackendScript,
                                             PrintManager PrintManagerScript,
                                             Transform PrintSettingsParentTransform
                                          )
     {       
         this.Scene3ManagerScript            = Scene3ManagerScript;
+        this.Scene3_BackendScript           = Scene3_BackendScript;
         this.PrintManagerScript             = PrintManagerScript;
         this.PrintSettingsParentTransform   = PrintSettingsParentTransform;
     }
@@ -48,7 +52,7 @@ public class Print : MonoBehaviour
     }
     public void SetPrintNumberInUI()
     {
-        OrderNumberText.text = "Print #" + (PrintDetailsObject.PrintNumber + 1).ToString();
+        PrintNumberText.text = "Print #" + (PrintDetailsObject.PrintNumber + 1).ToString();
     }
     public PrintDetails GetOrderData()
     {
@@ -72,6 +76,40 @@ public class Print : MonoBehaviour
     {
         PrintDetailsObject.PDFName = FileName;
     }
+
+
+
+
+    public void ClickedSelectPDFFile()
+    {
+        SelectPDF();
+    }
+    public void SelectPDF()
+    {
+        NativeFilePicker.PickFile(
+            (path) =>
+            {
+                if (string.IsNullOrEmpty(path))
+                {
+                    Debug.Log("No file selected.");
+                    return;
+                }
+
+                Debug.Log("Selected PDF:");
+
+                Debug.Log(path);
+
+                PrintDetailsObject.PrintFilePath = path; 
+            },
+            new string[]
+            {
+            "application/pdf"
+            });
+    }
+
+
+
+
     public void ClickedPrintSettingsButton()
     {
         if (PrintSettingsObject)
@@ -101,6 +139,7 @@ public class Print : MonoBehaviour
 
         Destroy(gameObject);
     }
+
 
 
 
