@@ -413,11 +413,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1823439738636806411, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
   m_PrefabInstance: {fileID: 3842579976387121386}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &608480182 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3394118702091738695, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
-  m_PrefabInstance: {fileID: 3842579976387121386}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &649034638 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1468990204250292819, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
@@ -557,7 +552,7 @@ MonoBehaviour:
   OrderSettingsParent: {fileID: 1761858672}
   PrintBillsManagerObject: {fileID: 84114901}
   OrderStatusManagerObject: {fileID: 466721182}
-  RecentOrdersPanel: {fileID: 608480182}
+  OrdersPanel: {fileID: 3842579976387121388}
 --- !u!114 &1608008630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -938,6 +933,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: OrderStatusManager
       objectReference: {fileID: 0}
+    - target: {fileID: 2599002307819819639, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394118702091738695, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_Name
+      value: OrdersPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394118702091738695, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4430578797594853186, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4713193206670797347, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4713193206670797347, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -954,6 +973,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20ca9a6026e872c45b77e7699e9e6be9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrderStatusManager
+--- !u!1 &3842579976387121388 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3394118702091738695, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+  m_PrefabInstance: {fileID: 3842579976387121386}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4269457911325989475
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1118,14 +1142,6 @@ PrefabInstance:
     - target: {fileID: 1468990204250292819, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_Name
       value: HomePage
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468990204250292819, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5463755983623088885, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
-      propertyPath: m_Name
-      value: 'RecentOrders (Button) '
       objectReference: {fileID: 0}
     - target: {fileID: 7072797684570989793, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_Pivot.x

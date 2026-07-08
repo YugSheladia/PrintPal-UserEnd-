@@ -24,7 +24,8 @@ public class Scene3Manager : MonoBehaviour
     [SerializeField] GameObject OrderStatusManagerObject;
 
 
-    [SerializeField] GameObject RecentOrdersPanel;
+    [SerializeField] GameObject OrdersPanel;
+    //[SerializeField] GameObject OrderHistoryPanel;
 
 
     private void Start()
@@ -44,11 +45,11 @@ public class Scene3Manager : MonoBehaviour
         DisableAllPanels();
         EnablePrintManager();
     }
-    public void RecentOrdersPage()
+    public void OrdersPage()
     {
         DisableAllPanels();
         EnableOrderStatusManager();
-        EnableRecentOrdersPanel();
+        EnableOrdersPanel();
     }
 
 
@@ -64,7 +65,8 @@ public class Scene3Manager : MonoBehaviour
         DisablePrintManager();
         DisablePrintBillsManager();
         DisableOrderStatusManager();
-        DisableRecentOrdersPanel();
+        DisableOrdersPanel();
+        DisableOrderHistoryPanel();
     }
 
 
@@ -120,12 +122,27 @@ public class Scene3Manager : MonoBehaviour
     {
         OrderStatusManagerObject.SetActive(false);
     }
-    public void EnableRecentOrdersPanel()
+    public void EnableOrdersPanel()
     {
-        RecentOrdersPanel.SetActive(true);
+        OrdersPanel.SetActive(true);
     }
-    public void DisableRecentOrdersPanel()
+    public void DisableOrdersPanel()
     {
-        RecentOrdersPanel.SetActive(false);
+        OrdersPanel.SetActive(false);
+    }
+
+
+
+
+
+
+
+    public void EnableOrderHistoryPanel()
+    {
+        //OrderHistoryPanel.SetActive(true);
+    }
+    public void DisableOrderHistoryPanel()
+    {
+        //OrderHistoryPanel.SetActive(false);
     }
 }

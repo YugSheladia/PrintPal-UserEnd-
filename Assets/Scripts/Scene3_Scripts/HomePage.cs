@@ -29,9 +29,14 @@ public class HomePage : MonoBehaviour
         Scene3ManagerScript.CreateOrderPage();
     } 
 
-    public void ClickedViewOrders()
+    public void ClickedRecentOrders()
     {
         Scene3_BackendScript.GetOrdersForCurrentUser();
+    }
+
+    public void ClickedOrderHistory()
+    {
+        Scene3_BackendScript.GetArchivedOrdersForCurrentUser();
     }
 
     public void ClickedViewProfile()

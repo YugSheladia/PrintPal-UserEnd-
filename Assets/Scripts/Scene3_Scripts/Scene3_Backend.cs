@@ -1,7 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -81,10 +80,13 @@ public class OrderSummary
 
     public int Status;
 
+    public int ArchivedByUser;
+
     public string CreatedAt;
     public string CompletedAt;
     public string CollectedAt;
-    public string DeletedAt;
+
+    public string ArchivedByUserAt;
 
     public int Completed;
 
@@ -111,6 +113,7 @@ public class PrintSummary
     public int OrderID;
 
     public string PDFName;
+    public string PrintFilePath;
 
     public int TotalPages;
 }
@@ -232,6 +235,7 @@ public class Scene3_Backend : MonoBehaviour
 
     //Creating an Order Request.
     CreateOrderRequest CurrentOrderRequest;
+    CreateOrderResponse CreateOrderResponse;
 
 
     //Creating Wrapper objects.
@@ -288,7 +292,6 @@ public class Scene3_Backend : MonoBehaviour
         CurrentOrderRequest = Request;
 
         StartCoroutine(SubmitPrintSettingsToServer());
-        //StartCoroutine(UploadAllPDFs());
     }
     IEnumerator SubmitPrintSettingsToServer()
     {
@@ -314,8 +317,6 @@ public class Scene3_Backend : MonoBehaviour
 
         yield return request.SendWebRequest();
 
-
-
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
@@ -323,9 +324,9 @@ public class Scene3_Backend : MonoBehaviour
             yield break;
         }
 
-
-
-        CreateOrderResponse Response = JsonUtility.FromJson<CreateOrderResponse>
+        CreateOrderResponse Response = new();
+        
+        Response = JsonUtility.FromJson<CreateOrderResponse>
                                                    (
                                                         request.downloadHandler.text
                                                    );
@@ -342,31 +343,41 @@ public class Scene3_Backend : MonoBehaviour
                     "Order Created\n\n" +
                     "Order ID = " + Response.OrderID +
                     "\nOTP = " + Response.OTP +
-                    "\nApproximate Time = " +
-                    Response.ApproximateTimeLeft
+                    "\nApproximate Time = " + Response.ApproximateTimeLeft
                  );
 
+        foreach(PrintSummary Print in Response.Prints)
+        {
+            Debug.Log(  "OrderID              = " + Print.OrderID         + 
+                        "\nPrintID            = " + Print.PrintID         + 
+                        "\nPDF Name           = " + Print.PDFName         + 
+                        "\nPrint File Path    = " + Print.PrintFilePath   + 
+                        "\nTotal Pages        = " + Print.TotalPages);
+        }
 
+
+        StartCoroutine(UploadAllPDFs(Response));
+    }
+
+    //Uploading PDFs
+    IEnumerator UploadAllPDFs(CreateOrderResponse Response)
+    {
+        foreach (PrintSummary Print in Response.Prints)
+        {
+            yield return StartCoroutine(UploadPDF(Print.PrintID, Print.PrintFilePath));
+        }
 
         PrintBillsManagerScript.ConfirmOrders();
     }
-
-
-
-    /*
-    //Uploading PDFs
-    IEnumerator UploadAllPDFs()
+    IEnumerator UploadPDF(int PrintID, string PrintFilePath)
     {
-        foreach (PrintDetails print in PrintManagerScript.PrintDetailsList)
+        if(!File.Exists(PrintFilePath))
         {
-            yield return StartCoroutine(UploadPDF(Print, ?));
-        }
+            Debug.LogError("File not found = " + PrintFilePath);
+            yield break;
+        }    
 
-        StartCoroutine(SubmitPrintSettingsToServer());
-    }
-    IEnumerator UploadPDF(PrintDetails Print, int PrintID)
-    {
-        byte[] pdfBytes = File.ReadAllBytes(Print.PrintFilePath);
+        byte[] pdfBytes = File.ReadAllBytes(PrintFilePath);
 
         WWWForm form = new WWWForm();
 
@@ -374,9 +385,9 @@ public class Scene3_Backend : MonoBehaviour
 
         form.AddBinaryData
         (
-            "PDF",
+            "PrintFile",
             pdfBytes,
-            Path.GetFileName(Print.PrintFilePath),
+            Path.GetFileName(PrintFilePath),
             "application/pdf"
         );
 
@@ -401,15 +412,17 @@ public class Scene3_Backend : MonoBehaviour
                 yield break;
             }
 
-            Debug.Log("Uploaded PDF for PrintID = " + response.PrintID);
+            Debug.Log("Uploaded PDF for PrintID = " + PrintID);
         }
     }
-    */
+   
 
 
 
 
-    // DOWNLOAD ALL USER ORDERS
+
+
+    // Download all Unarchived User Orders.
     public void GetOrdersForCurrentUser()
     {
         StartCoroutine(GetOrders());
@@ -464,6 +477,63 @@ public class Scene3_Backend : MonoBehaviour
 
         Debug.Log("Finished downloading Orders.");
     }
+
+    // Downlaod All Archived User Orders.
+    public void GetArchivedOrdersForCurrentUser()
+    {
+        StartCoroutine(GetArchivedOrders());
+    }
+    IEnumerator GetArchivedOrders()
+    {
+        Debug.Log("Downloading Orders...");
+
+        // Clear previously downloaded data.
+        ConfirmedOrders.Orders.Clear();
+        ConfirmedPrints.Prints.Clear();
+        ConfirmedPrintSettings.PrintSettings.Clear();
+        ConfirmedPrintBills.PrintBills.Clear();
+
+        UnityWebRequest request = UnityWebRequest.Get
+                                                  (
+                                                        $"http://localhost:3000/userOrders/archived?UserID={Script1.UserID}"
+                                                  );
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+
+        Debug.Log(request.downloadHandler.text);
+
+        OrderSummaryWrapper Response = JsonUtility.FromJson<OrderSummaryWrapper>
+                                                   (
+                                                        request.downloadHandler.text
+                                                   );
+
+        if (Response == null || !Response.Success)
+        {
+            Debug.LogError("Failed to download orders.");
+            yield break;
+        }
+
+        ConfirmedOrders.Orders.AddRange(Response.Orders);
+
+        Debug.Log
+        (
+            "Downloaded "
+            + ConfirmedOrders.Orders.Count
+            + " Orders."
+        );
+
+        yield return StartCoroutine(GetPrints());
+
+        Debug.Log("Finished downloading Archived Orders.");
+    }
+
+
     IEnumerator GetPrints()
     {
         Debug.Log("Downloading Prints...");
@@ -609,7 +679,6 @@ public class Scene3_Backend : MonoBehaviour
         Debug.Log("Finished downloading everything.");
     }
 
-
     //Converting all orders recieved from server into PrintDetails type, for easy creation of OrderPanels.
     void BuildPrintDetails()
     {
@@ -652,6 +721,7 @@ public class Scene3_Backend : MonoBehaviour
                 PrintDetails Details = new PrintDetails();
 
                 Details.PrintNumber = Print.PrintNumber;
+                Details.PrintID = Print.PrintID;
 
                 Details.PDFName = Print.PDFName;
 
@@ -696,8 +766,9 @@ public class Scene3_Backend : MonoBehaviour
 
         OrderStatusManagerScript.CreateOrderStatusPanels();
 
-        Scene3ManagerScript.RecentOrdersPage();
+        Scene3ManagerScript.OrdersPage();
     }
+
 
 
 
@@ -763,6 +834,97 @@ public class Scene3_Backend : MonoBehaviour
             {
                 Debug.LogError(response.Message);
             }
+        }
+    }
+
+
+
+
+
+
+
+    //Setting Orders as Archived / Unarchived
+    [System.Serializable]
+    public class OrderIDRequest
+    {
+        public int OrderID;
+    }
+
+    public void SetOrderAsArchived(int OrderID)
+    {
+        StartCoroutine(Coroutine_SetOrderAsArchived(OrderID));
+    }
+    IEnumerator Coroutine_SetOrderAsArchived(int OrderID)
+    {
+        OrderIDRequest requestBody = new();
+        requestBody.OrderID = OrderID;
+
+        string json = JsonUtility.ToJson(requestBody);
+
+        byte[] body = System.Text.Encoding.UTF8.GetBytes(json);
+
+        UnityWebRequest request = new UnityWebRequest(
+                                                            "http://localhost:3000/order/user-archive",
+                                                            "POST"
+                                                      );
+
+        request.uploadHandler = new UploadHandlerRaw(body);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader(
+                                    "Content-Type",
+                                    "application/json"
+                                );
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Order marked as Archived.");
+        }
+        else
+        {
+            Debug.LogError(request.error);
+        }
+    }
+
+    public void SetOrderAsUnarchived(int OrderID)
+    {
+        StartCoroutine(Coroutine_SetOrderAsUnarchived(OrderID));
+    }
+    IEnumerator Coroutine_SetOrderAsUnarchived(int OrderID)
+    {
+        OrderIDRequest requestBody = new();
+        requestBody.OrderID = OrderID;
+
+        string json = JsonUtility.ToJson(requestBody);
+
+        byte[] body = System.Text.Encoding.UTF8.GetBytes(json);
+
+        UnityWebRequest request = new UnityWebRequest(
+                                                            "http://localhost:3000/order/user-unarchive",
+                                                            "POST"
+                                                      );
+
+        request.uploadHandler = new UploadHandlerRaw(body);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader(
+                                    "Content-Type",
+                                    "application/json"
+                                );
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Order marked as Unarchived.");
+        }
+        else
+        {
+            Debug.LogError(request.error);
         }
     }
 }

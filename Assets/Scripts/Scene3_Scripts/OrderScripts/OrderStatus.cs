@@ -26,6 +26,9 @@ public class OrderStatus : MonoBehaviour
     [SerializeField] TMP_Text OrderIDText;
     [SerializeField] TMP_Text OrderOTPText;
 
+    [SerializeField] GameObject ArchivedOrderButtonsPanel;
+    [SerializeField] GameObject UnarchivedOrderButtonsPanel;
+
     [SerializeField] private Image ViewDetailsObject;
     [SerializeField] private Image StatusIndicator;
 
@@ -38,11 +41,18 @@ public class OrderStatus : MonoBehaviour
     {
         Pending,
         Completed,
-        Collected,
-        Deleted
+        Collected
     }
 
     OrderStatusEnum orderStatusEnum;
+
+    enum ArchiveEnum
+    {
+        Unarchived,
+        Archived
+    }
+
+    ArchiveEnum archiveEnum;
 
     
 
@@ -71,6 +81,7 @@ public class OrderStatus : MonoBehaviour
     private void UpdateUI()
     {
         orderStatusEnum = (OrderStatusEnum)OrderSummaryObject.Status;
+        archiveEnum = (ArchiveEnum)OrderSummaryObject.ArchivedByUser;
 
         switch (orderStatusEnum)
         {
@@ -105,20 +116,27 @@ public class OrderStatus : MonoBehaviour
                 OrderStatusText.color = new Color32(2, 141, 26, 220);
                 ViewDetailsObject.color = new Color32(2, 141, 26, 220);
                 
+                break;                
+
+            default:
+                Debug.Log("Invalid Order Status");
+                Destroy(gameObject);
+                break;
+        }
+
+        switch (archiveEnum)
+        {
+            case ArchiveEnum.Unarchived:
+                EnableUnarchivedOrderButtons_Panel();
                 break;
 
-            case OrderStatusEnum.Deleted:
-                OrderStatusText.text = "Archived";
-
-                StatusTimeStampText.text = "Archived by Stationery at : " + OrderSummaryObject.DeletedAt.ToString();
+            case ArchiveEnum.Archived:
+                EnableArchiveOrderButtons_Panel();
 
                 StatusIndicator.color = new Color32(124, 124, 124, 255);
                 OrderStatusText.color = new Color32(36, 36, 36, 150);
                 ViewDetailsObject.color = new Color32(36, 36, 36, 150);
-                
-                break;
 
-            default:
                 break;
         }
 
@@ -143,7 +161,7 @@ public class OrderStatus : MonoBehaviour
 
         CreateOrderStatusInfo();
 
-        Scene3ManagerScript.DisableRecentOrdersPanel();
+        Scene3ManagerScript.DisableOrdersPanel();
     }
     private void CreateOrderStatusInfo()
     {
@@ -207,8 +225,40 @@ public class OrderStatus : MonoBehaviour
 
         Scene3ManagerScript.DisableAllPanels();
         Scene3ManagerScript.HomePage();
+    }
 
-        //Scene3ManagerScript.EnableRecentOrdersPanel();
 
+
+    public void DisableAllPanels()
+    {
+        ArchivedOrderButtonsPanel.SetActive(false);
+        UnarchivedOrderButtonsPanel.SetActive(false);
+    }
+    public void EnableArchiveOrderButtons_Panel()
+    {
+        DisableAllPanels();
+        ArchivedOrderButtonsPanel.SetActive(true);
+    }
+    public void EnableUnarchivedOrderButtons_Panel()
+    {
+        DisableAllPanels();
+        UnarchivedOrderButtonsPanel.SetActive(true);
+    }
+
+
+
+    public void ClickedArchiveButton()
+    {
+        Scene3_BackendScript.SetOrderAsArchived(OrderSummaryObject.OrderID);
+
+        UpdateUI();
+        Destroy(gameObject);
+    }
+    public void ClickedUnarchiveButton()
+    {
+        Scene3_BackendScript.SetOrderAsUnarchived(OrderSummaryObject.OrderID);
+
+        UpdateUI();
+        Destroy(gameObject);
     }
 }

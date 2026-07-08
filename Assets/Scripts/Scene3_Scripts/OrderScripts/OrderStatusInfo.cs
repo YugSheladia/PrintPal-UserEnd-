@@ -12,7 +12,7 @@ public class OrderStatusInfo : MonoBehaviour
     }
     public void ClickedPreviousPageButton()
     {
-        Scene3ManagerScript.RecentOrdersPage();
+        Scene3ManagerScript.OrdersPage();
 
         Destroy(gameObject);
     }
