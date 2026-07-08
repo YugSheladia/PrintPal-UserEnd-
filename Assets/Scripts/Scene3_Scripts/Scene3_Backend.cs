@@ -383,9 +383,12 @@ public class Scene3_Backend : MonoBehaviour
 
         form.AddField("PrintID", PrintID);
 
+        Debug.Log("Uploading file: " + Path.GetFileName(PrintFilePath));
+        Debug.Log("Extension: " + Path.GetExtension(PrintFilePath));
+
         form.AddBinaryData
         (
-            "PrintFile",
+            "PDF",
             pdfBytes,
             Path.GetFileName(PrintFilePath),
             "application/pdf"
