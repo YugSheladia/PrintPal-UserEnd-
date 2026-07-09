@@ -23,7 +23,6 @@ public class PrintSettings : MonoBehaviour
     [SerializeField] private TMP_Dropdown   PagesPerSheetDropDown;
     [SerializeField] private TMP_Dropdown   ColorDropDown;
     [SerializeField] private TMP_InputField Copies;
-    [SerializeField] private TMP_InputField Pages;
 
 
     PrintDetails PrintDetailsObject;
@@ -52,7 +51,6 @@ public class PrintSettings : MonoBehaviour
         ColorEnum           Color           = (ColorEnum)           ColorDropDown           .value;
 
         int CopiesInt  = int.Parse(Copies.text);
-        int PagesInt   = int.Parse(Pages.text);
 
         PrintDetailsObject = PrintScript.GetOrderData();
 
@@ -65,9 +63,6 @@ public class PrintSettings : MonoBehaviour
         PrintDetailsObject.Color          = Color;
 
         PrintDetailsObject.Copies = CopiesInt;
-        PrintDetailsObject.Pages  = PagesInt;
-
-        print("Inside PrintSettings.ClickedContinueButton() => " + SideSelection +SideSelection.ToString());
         
         Scene3ManagerScript.EnablePrintManager();
         PrintScript.DisablePrintSettings();

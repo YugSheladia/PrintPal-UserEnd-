@@ -53,13 +53,17 @@ public class PrintDetails
 {
     public Print PrintScript;
 
-    public int OrderID;
-    public int PrintID;
+    //Part it recieves from the server.
+    public int      OrderID;
+    public int      PrintID;
+    public string   UploadedPDFName;
+    public int      FileSize;
+    public float    UnitPrice;
 
-    public int      PrintNumber;
-    public string   PDFName;
+    public int PrintNumber;
 
-    public string PrintFilePath;
+    public string PDFName; 
+    public string PDFFilePath;
 
     public PageSelectionEnum    PageSelection   = PageSelectionEnum.AllPages;
     public SideSelectionEnum    SideSelection   = SideSelectionEnum.SingleSided;
@@ -70,7 +74,7 @@ public class PrintDetails
     public ColorEnum            Color           = ColorEnum.BlackAndWhite;
 
     public int Copies = 1;
-    public int Pages = 1;
+    public int Pages;
 
     public int EffectiveSheets;
     public float BillAmount;
@@ -86,7 +90,7 @@ public class PrintDetails
     public PrintDetails(PrintDetails Source)
     {
         PrintNumber = Source.PrintNumber;
-        PDFName     = Source.PDFName;
+        PDFName     = Source.PDFName; //?
 
         PageSelection   = Source.PageSelection;
         SideSelection   = Source.SideSelection;
@@ -97,7 +101,7 @@ public class PrintDetails
         Color           = Source.Color;
 
         Copies  = Source.Copies;
-        Pages   = Source.Pages;
+        Pages   = Source.Pages; //?
     }
 
 
@@ -190,17 +194,38 @@ public class PrintManager : MonoBehaviour
 
 
 
-    public void ClickedPrintButton()
+    public void ClickedProceedButton()
     {
         if (PrintDetailsList.Count <= 0)
         {
             print("Atleast 1 print is required.");
+            return;
         }
-        else
+
+        if(!AllPrintsHavePDFsAttached())
         {
-            PrintBillsManagerScript.CreateBills();    
+            print("A PDF must be attached to every print.");
+            return;
         }
+
+        Scene3ManagerScript.EnableInvisiblePanel();
+        PrintBillsManagerScript.CreateBills();    
     }
+    public bool AllPrintsHavePDFsAttached()
+    {
+        foreach (PrintDetails PrintDetailsObject in PrintDetailsList)
+        {
+            if (string.IsNullOrEmpty(PrintDetailsObject.PDFFilePath))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
     public void ClickedPreviousPageButton()
     {
         Scene3ManagerScript.HomePage();
@@ -208,31 +233,28 @@ public class PrintManager : MonoBehaviour
 
 
 
-    public void ClearOrders()
+    public void ClearPrints()
     {
-        DestroyAllOrderObjects();
-        ClearOrdersDetailList();
+        DestroyAllPrintObjects();
+        ClearPrintDetailsList();
 
         PrintBillsManagerScript.DestroyAllBills();
     }   
-    private void DestroyAllOrderObjects()
+    private void DestroyAllPrintObjects()
     {
-        // CHANGE:
-        // Destroy actual Order objects in hierarchy.
+        Print[] Prints = PrintListParent.GetComponentsInChildren<Print>();
 
-        Print[] Orders = PrintListParent.GetComponentsInChildren<Print>();
-
-        foreach (Print OrderScript in Orders)
+        foreach (Print PrintScript in Prints)
         {
-            if (OrderScript != null)
+            if (PrintScript != null)
             {
-                OrderScript.DestroyOrderSettingsObject();
+                PrintScript.DestroyOrderSettingsObject();
 
-                Destroy(OrderScript.gameObject);
+                Destroy(PrintScript.gameObject);
             }
         }
     }
-    private void ClearOrdersDetailList()
+    private void ClearPrintDetailsList()
     {
         PrintDetailsList.Clear();
     }

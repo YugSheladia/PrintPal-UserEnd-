@@ -37,8 +37,7 @@ public class Scene3Manager : MonoBehaviour
     {
         Debug.Log("Called HomePage()");
         DisableAllPanels();
-        EnableHomePage();
-        
+        EnableHomePage();  
     }
     public void CreateOrderPage()
     {
@@ -66,7 +65,6 @@ public class Scene3Manager : MonoBehaviour
         DisablePrintBillsManager();
         DisableOrderStatusManager();
         DisableOrdersPanel();
-        DisableOrderHistoryPanel();
     }
 
 
@@ -87,6 +85,7 @@ public class Scene3Manager : MonoBehaviour
     {
         InvisiblePanel.SetActive(false);
     }
+
 
 
     public void EnableHomePage()
@@ -129,20 +128,5 @@ public class Scene3Manager : MonoBehaviour
     public void DisableOrdersPanel()
     {
         OrdersPanel.SetActive(false);
-    }
-
-
-
-
-
-
-
-    public void EnableOrderHistoryPanel()
-    {
-        //OrderHistoryPanel.SetActive(true);
-    }
-    public void DisableOrderHistoryPanel()
-    {
-        //OrderHistoryPanel.SetActive(false);
     }
 }

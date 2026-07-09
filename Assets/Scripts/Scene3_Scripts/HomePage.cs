@@ -31,6 +31,7 @@ public class HomePage : MonoBehaviour
 
     public void ClickedRecentOrders()
     {
+        Scene3ManagerScript.EnableInvisiblePanel();
         Scene3_BackendScript.GetOrdersForCurrentUser();
     }
 

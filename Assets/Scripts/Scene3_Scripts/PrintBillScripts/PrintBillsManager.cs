@@ -22,6 +22,8 @@ public class PrintBillsManager : MonoBehaviour
     Print_FinalBill FinalBillScript;
 
     public float FinalBillAmount;
+    public int TotalBillsCompleted;
+
 
 
 
@@ -30,6 +32,7 @@ public class PrintBillsManager : MonoBehaviour
         DestroyAllBills();
 
         FinalBillAmount = 0;
+        TotalBillsCompleted = 0;
 
         foreach (PrintDetails Print in PrintManagerScript.PrintDetailsList)
         {
@@ -41,19 +44,28 @@ public class PrintBillsManager : MonoBehaviour
 
             PrintBill PrintBillScript = PrintBillObject.GetComponent<PrintBill>();
 
+            PrintBillScript.SetRequiredScripts(Scene3_BackendScript, this);
             PrintBillScript.SetBillDetailsInBillScript(Print);
 
-            Print.EffectiveSheets   = PrintBillScript.EffectiveSheets;
-            Print.BillAmount        = PrintBillScript.TotalPrice;
+            PrintBillScript.CalculatePrice();
 
-            FinalBillAmount += PrintBillScript.TotalPrice;
+            //Print.EffectiveSheets   = PrintBillScript.EffectiveSheets;
+            //Print.BillAmount        = PrintBillScript.TotalPrice;
         }
+    }
+    public void BillsFinished(PrintBill Bill)
+    {
+        FinalBillAmount += Bill.TotalPrice;
 
+        TotalBillsCompleted++;
 
-        CreateFinalBill();
+        if(TotalBillsCompleted == PrintManagerScript.PrintDetailsList.Count)
+        {
+            CreateFinalBill();
 
-        Scene3ManagerScript.EnablePrintBillsManager();
-        Scene3ManagerScript.DisablePrintManager();
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+        }
     }
     public void DestroyAllBills()
     {
@@ -94,12 +106,11 @@ public class PrintBillsManager : MonoBehaviour
         Scene3_BackendScript.CreateOrder();
     }
     
-    public void ConfirmOrders()
+    public void ConfirmOrder()
     {
-        Debug.Log("Orders Confirmed.");
+        Debug.Log("Order Confirmed.");
 
-        PrintManagerScript.ClearOrders();
-
+        PrintManagerScript.ClearPrints();
 
         Scene3ManagerScript.DisableAllPanels();
         Scene3ManagerScript.HomePage();

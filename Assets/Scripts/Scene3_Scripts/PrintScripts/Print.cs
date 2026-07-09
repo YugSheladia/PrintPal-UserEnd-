@@ -2,6 +2,7 @@
 
 using TMPro;
 using UnityEngine;
+using System.IO;
 
 
 public class Print : MonoBehaviour
@@ -16,8 +17,8 @@ public class Print : MonoBehaviour
 
 
     [Header("Print stuff")]
-    [SerializeField] private    TMP_Text        PrintNumberText;
-    [SerializeField] public     TMP_InputField  PDFFileNameInputField;
+    [SerializeField] private TMP_Text PrintNumberText;
+    [SerializeField] private TMP_Text PDFNameText;
 
 
     [Header("PrintSettings stuff")]
@@ -33,7 +34,8 @@ public class Print : MonoBehaviour
 
 
 
-    //functions called by OrderManager ->
+
+    //functions called by PrintManager ->
     public void InitializeRequiredScripts(
                                             Scene3Manager Scene3ManagerScript,
                                             Scene3_Backend Scene3_BackendScript,
@@ -52,31 +54,12 @@ public class Print : MonoBehaviour
     }
     public void SetPrintNumberInUI()
     {
-        PrintNumberText.text = "Print #" + (PrintDetailsObject.PrintNumber + 1).ToString();
+        PrintNumberText.text = (PrintDetailsObject.PrintNumber+1).ToString();
     }
     public PrintDetails GetOrderData()
     {
         return PrintDetailsObject;
     }
-
-
-
-    public void EnablePrintSettings()
-    {
-        PrintSettingsObject.SetActive(true);
-    }
-    public void DisablePrintSettings()
-    {
-        PrintSettingsObject.SetActive(false);
-    }
-
-
-
-    public void OnFileNameChanged(string FileName)
-    {
-        PrintDetailsObject.PDFName = FileName;
-    }
-
 
 
 
@@ -96,10 +79,12 @@ public class Print : MonoBehaviour
                 }
 
                 Debug.Log("Selected PDF:");
-
                 Debug.Log(path);
 
-                PrintDetailsObject.PrintFilePath = path; 
+                PrintDetailsObject.PDFFilePath = path;
+                PrintDetailsObject.PDFName = Path.GetFileName(path);
+
+                PDFNameText.text = Path.GetFileName(path);
             },
             new string[]
             {
@@ -125,9 +110,22 @@ public class Print : MonoBehaviour
             PrintSettingsScript.SetPrintScript(this);
         }
 
+        Scene3ManagerScript.DisableAllPanels();
         EnablePrintSettings();
-        Scene3ManagerScript.DisablePrintManager();
+
+        //Scene3ManagerScript.DisablePrintManager();
     }
+    public void EnablePrintSettings()
+    {
+        PrintSettingsObject.SetActive(true);
+    }
+    public void DisablePrintSettings()
+    {
+        PrintSettingsObject.SetActive(false);
+    }
+
+
+
     public void ClickedRemoveOrderButton()
     {
         if (PrintSettingsScript != null)

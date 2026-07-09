@@ -159,9 +159,8 @@ public class OrderStatus : MonoBehaviour
             return;
         }
 
+        Scene3ManagerScript.EnableInvisiblePanel();
         CreateOrderStatusInfo();
-
-        Scene3ManagerScript.DisableOrdersPanel();
     }
     private void CreateOrderStatusInfo()
     {
@@ -195,11 +194,15 @@ public class OrderStatus : MonoBehaviour
 
             PrintBill BillScript = BillObject.GetComponent<PrintBill>();
 
-            BillScript.SetPrintBillsManagerScript(PrintBillsManagerScript);
+            BillScript.SetRequiredScripts(Scene3_BackendScript, PrintBillsManagerScript);
             BillScript.SetBillDetailsInBillScript(Print);
+            BillScript.SetBillDetailsInUI();
         }
 
         CreateFinalBill(BillParent);
+
+        Scene3ManagerScript.DisableInvisiblePanel();
+        Scene3ManagerScript.DisableOrdersPanel();
     }
     private void CreateFinalBill(Transform BillParent)
     {

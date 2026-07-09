@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Globalization;
 
 
 
@@ -12,11 +13,11 @@ using UnityEngine.Networking;
 [System.Serializable]
 public class CreateOrderRequest
 {
-    public int UserID;
-    public float FinalAmount;
-    public int StationeryID;
-
-    public List<PrintDTO> Prints;
+    public int      UserID;
+    public int      StationeryID;
+    public float    FinalAmount;
+    
+    public List <int> PrintIDs;
 }
 
 [System.Serializable]
@@ -26,7 +27,7 @@ public class PrintDTO
     public int PrintID;
 
     public string PDFName;
-    public string PrintFilePath;
+    public string PDFFilePath;
 
     public int Pages;
     public int Copies;
@@ -44,7 +45,7 @@ public class PrintDTO
 }
 
 [System.Serializable]
-public class CreateOrderResponse
+public class CurrentOrderResponse
 {
     public bool Success;
 
@@ -53,7 +54,7 @@ public class CreateOrderResponse
 
     public int ApproximateTimeLeft;
 
-    public PrintSummary[] Prints;
+    //public PrintSummary[] Prints;
 
     public string Message;
 }
@@ -62,7 +63,7 @@ public class CreateOrderResponse
 
 
 //=======================================================
-//Recieve all possible info about an issued order.
+// Receive all possible info about an issued order.
 //=======================================================
 
 // ORDERS TABLE
@@ -113,7 +114,7 @@ public class PrintSummary
     public int OrderID;
 
     public string PDFName;
-    public string PrintFilePath;
+    public string PDFFilePath;
 
     public int TotalPages;
 }
@@ -181,7 +182,7 @@ public class PrintBillsSummaryWrapper
 }
 
 
-// Stationery TABLE
+// STATIONERIES TABLE
 [System.Serializable]
 public class StationerySummary
 {
@@ -209,13 +210,18 @@ public class StationerySummaryWrapper
 }
 
 
-
+// PDF Upload Response
 [System.Serializable]
 public class UploadResponse
 {
     public bool Success;
-    public int PrintID;
     public string Message;
+
+    public int PrintID;
+    public string PDFName;
+
+    public int TotalPages;
+    public int FileSize;
 }
 
 
@@ -230,74 +236,207 @@ public class Scene3_Backend : MonoBehaviour
     [SerializeField] PrintManager       PrintManagerScript;
     [SerializeField] PrintBillsManager  PrintBillsManagerScript;
     [SerializeField] OrderStatusManager OrderStatusManagerScript;
-    
 
 
-    //Creating an Order Request.
-    CreateOrderRequest CurrentOrderRequest;
-    CreateOrderResponse CreateOrderResponse;
+    // Creating an Order Request & Server Response.
+    CreateOrderRequest      CurrentOrderRequest;
+    CurrentOrderResponse    CurrentOrderResponse;
 
 
-    //Creating Wrapper objects.
-    public OrderSummaryWrapper ConfirmedOrders = new();
-    public PrintSummaryWrapper ConfirmedPrints = new();
-    public PrintSettingsSummaryWrapper ConfirmedPrintSettings = new();
-    public PrintBillsSummaryWrapper ConfirmedPrintBills = new();
+    // Wrapper objects.
+    public OrderSummaryWrapper          ConfirmedOrders         = new();
+    public PrintSummaryWrapper          ConfirmedPrints         = new();
+    public PrintSettingsSummaryWrapper  ConfirmedPrintSettings  = new();
+    public PrintBillsSummaryWrapper     ConfirmedPrintBills     = new();
 
 
 
-    // CrateOrder function initialized Order Request, and then calls SubmitPrintSettingsToServer.
+    bool OperationSucceeded = true;
+
     public void CreateOrder()
     {
-        CreateOrderRequest Request = new();
+        StartCoroutine(CreateOrderRoutine());
+    }
 
-        Debug.Log("Inside Create Order, UserID = " + Script1.UserID);
-        Request.UserID = Script1.UserID;
+    IEnumerator CreateOrderRoutine()
+    {
+        CurrentOrderRequest = new CreateOrderRequest();
 
-        Request.FinalAmount = PrintBillsManagerScript.FinalBillAmount;
+        CurrentOrderRequest.UserID          = Script1.UserID;
+        CurrentOrderRequest.StationeryID    = Script1.StationeryID;
+        CurrentOrderRequest.FinalAmount     = PrintBillsManagerScript.FinalBillAmount;
 
-        Debug.Log("Inside Create Order, StationeryID = " + Script1.StationeryID);
-        Request.StationeryID = Script1.StationeryID;
+        CurrentOrderRequest.PrintIDs        = new List<int>();
 
-        Request.Prints = new List<PrintDTO>();
 
-        foreach (PrintDetails Print in PrintManagerScript.PrintDetailsList)
+        yield return ValidateAllPDFs();
+
+
+        if (!OperationSucceeded) yield break;
+        yield return UploadAllPrints();
+
+
+        if (!OperationSucceeded) yield break;
+        yield return SubmitOrder();
+
+        if(!OperationSucceeded) yield break;
+        Debug.Log("Done");
+
+        PrintBillsManagerScript.ConfirmOrder();
+    }
+
+    IEnumerator ValidateAllPDFs()
+    {
+        foreach (PrintDetails print in PrintManagerScript.PrintDetailsList)
         {
-            PrintDTO dto = new PrintDTO();
+            if (!File.Exists(print.PDFFilePath))
+            {
+                Debug.LogError("File does not exist:\n" + print.PDFFilePath);
+                OperationSucceeded = false;
+                yield break;
+            }
 
-            dto.PrintNumber = Print.PrintNumber;
-            //dto.PrintID = Print.PrintID;
+            if (Path.GetExtension(print.PDFFilePath).ToLower() != ".pdf")
+            {
+                Debug.LogError("Not a PDF:\n" + print.PDFFilePath);
+                OperationSucceeded = false;
+                yield break;
+            }
 
-            dto.PDFName = Print.PDFName;
-            dto.PrintFilePath = Print.PrintFilePath;
+            FileInfo fileInfo = new FileInfo(print.PDFFilePath);
 
-            dto.Pages = Print.Pages;
+            if (fileInfo.Length == 0)
+            {
+                Debug.LogError("PDF is empty:\n" + print.PDFFilePath);
+                OperationSucceeded = false;
+                yield break;
+            }
 
-            dto.Copies = Print.Copies;
+            byte[] header = new byte[5];
 
-            dto.PageSelection = (int)Print.PageSelection;
-            dto.SideSelection = (int)Print.SideSelection;
-            dto.Collated = (int)Print.CollatedOrNot;
-            dto.Orientation = (int)Print.Orientation;
-            dto.Margin = (int)Print.Margin;
-            dto.PagesPerSheet = (int)Print.PagesPerSheet;
-            dto.Color = (int)Print.Color;
+            using (FileStream stream = File.OpenRead(print.PDFFilePath))
+            {
+                stream.Read(header, 0, 5);
+            }
 
-            dto.EffectiveSheets = Print.EffectiveSheets;
-            dto.BillAmount = Print.BillAmount;
+            string headerString = System.Text.Encoding.ASCII.GetString(header);
 
-            Request.Prints.Add(dto);
+            if (headerString != "%PDF-")
+            {
+                Debug.LogError("Invalid PDF:\n" + print.PDFFilePath);
+                OperationSucceeded = false;
+                yield break;
+            }
         }
 
-        CurrentOrderRequest = Request;
-
-        StartCoroutine(SubmitPrintSettingsToServer());
+        Debug.Log("All PDFs validated successfully.");
     }
-    IEnumerator SubmitPrintSettingsToServer()
+
+    IEnumerator UploadAllPrints()
+    {
+        foreach (PrintDetails print in PrintManagerScript.PrintDetailsList)
+        {
+            if (!File.Exists(print.PDFFilePath))
+            {
+                Debug.LogError("File not found:\n" + print.PDFFilePath);
+                OperationSucceeded = false;
+                yield break;
+            }
+
+            byte[] pdfBytes = File.ReadAllBytes(print.PDFFilePath);
+
+            WWWForm form = new WWWForm();
+
+            //--------------------------------------------------
+            // PDF
+            //--------------------------------------------------
+
+            form.AddBinaryData(
+                "PDF",
+                pdfBytes,
+                Path.GetFileName(print.PDFFilePath),
+                "application/pdf"
+            );
+
+            //--------------------------------------------------
+            // Print information
+            //--------------------------------------------------
+
+            form.AddField("PrintNumber", print.PrintNumber);
+
+            form.AddField("PDFName", Path.GetFileName(print.PDFFilePath));
+            form.AddField("PrintFilePath", print.PDFFilePath);
+
+            form.AddField("PageSelection", (int)print.PageSelection);
+            form.AddField("SideSelection", (int)print.SideSelection);
+            form.AddField("Collated", (int)print.CollatedOrNot);
+            form.AddField("Orientation", (int)print.Orientation);
+            form.AddField("Margin", (int)print.Margin);
+            form.AddField("PagesPerSheet", (int)print.PagesPerSheet);
+            form.AddField("Color", (int)print.Color);
+
+            form.AddField("Copies", print.Copies);
+
+            form.AddField("EffectiveSheets", print.EffectiveSheets);
+
+            //Looks weird, but this is just to avoid issues the bill amount being a float value. 
+            form.AddField("BillAmount", print.BillAmount.ToString(CultureInfo.InvariantCulture));   
+
+            using (UnityWebRequest request = UnityWebRequest.Post(
+                                                                    "http://localhost:3000/upload-print", form)
+                                                                 )
+            {
+                yield return request.SendWebRequest();
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError(request.error);
+
+                    if (!string.IsNullOrEmpty(request.downloadHandler.text))
+                    {
+                        Debug.LogError(request.downloadHandler.text);
+                    }
+
+                    OperationSucceeded = false;
+                    yield break;
+                }
+
+                UploadResponse response = JsonUtility.FromJson<UploadResponse>(request.downloadHandler.text);
+
+                if (!response.Success)
+                {
+                    Debug.LogError(response.Message);
+                    OperationSucceeded = false;
+                    yield break;
+                }
+
+                //--------------------------------------------------
+                // Save PrintID for CreateOrder()
+                //--------------------------------------------------
+
+                CurrentOrderRequest.PrintIDs.Add(response.PrintID);
+
+                //--------------------------------------------------
+                // Optional: update local data
+                //--------------------------------------------------
+
+                print.PrintID   = response.PrintID;     //Added by me.
+                print.Pages     = response.TotalPages;
+                print.FileSize  = response.FileSize;
+                print.PDFName   = response.PDFName;
+
+                Debug.Log($"Uploaded Print #{print.PrintNumber} (ID = {response.PrintID})");
+            }
+        }
+
+        Debug.Log("All prints uploaded successfully.");
+    }
+
+    IEnumerator SubmitOrder()
     {
         string json = JsonUtility.ToJson(CurrentOrderRequest);
 
-        Debug.Log("JSON = " + json);
+        Debug.Log(json);
 
         byte[] raw = System.Text.Encoding.UTF8.GetBytes(json);
 
@@ -306,8 +445,7 @@ public class Scene3_Backend : MonoBehaviour
                                                         "POST"
                                                      );
 
-        request.uploadHandler = new UploadHandlerRaw(raw);
-
+        request.uploadHandler   = new UploadHandlerRaw(raw);
         request.downloadHandler = new DownloadHandlerBuffer();
 
         request.SetRequestHeader(
@@ -320,110 +458,46 @@ public class Scene3_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
-            Debug.LogError(request.downloadHandler.text);
+
+            if (!string.IsNullOrEmpty(request.downloadHandler.text))
+            {
+                Debug.LogError(request.downloadHandler.text);
+            }
+
+            OperationSucceeded = false;
             yield break;
         }
 
-        CreateOrderResponse Response = new();
-        
-        Response = JsonUtility.FromJson<CreateOrderResponse>
-                                                   (
-                                                        request.downloadHandler.text
-                                                   );
+        CurrentOrderResponse = JsonUtility.FromJson<CurrentOrderResponse>(
+                                                                            request.downloadHandler.text
+                                                                         );
 
-        if (!Response.Success)
+        if (!CurrentOrderResponse.Success)
         {
-            Debug.LogError(Response.Message);
+            Debug.LogError(CurrentOrderResponse.Message);
+            OperationSucceeded = false;
             yield break;
         }
-
-
 
         Debug.Log(
-                    "Order Created\n\n" +
-                    "Order ID = " + Response.OrderID +
-                    "\nOTP = " + Response.OTP +
-                    "\nApproximate Time = " + Response.ApproximateTimeLeft
+                    "Order Created \n" +
+                    "\nOrder ID = " + CurrentOrderResponse.OrderID +
+                    "\nOTP = " + CurrentOrderResponse.OTP +
+                    "\nApproximate Time = " + CurrentOrderResponse.ApproximateTimeLeft
                  );
-
-        foreach(PrintSummary Print in Response.Prints)
-        {
-            Debug.Log(  "OrderID              = " + Print.OrderID         + 
-                        "\nPrintID            = " + Print.PrintID         + 
-                        "\nPDF Name           = " + Print.PDFName         + 
-                        "\nPrint File Path    = " + Print.PrintFilePath   + 
-                        "\nTotal Pages        = " + Print.TotalPages);
-        }
-
-
-        StartCoroutine(UploadAllPDFs(Response));
     }
 
-    //Uploading PDFs
-    IEnumerator UploadAllPDFs(CreateOrderResponse Response)
-    {
-        foreach (PrintSummary Print in Response.Prints)
-        {
-            yield return StartCoroutine(UploadPDF(Print.PrintID, Print.PrintFilePath));
-        }
-
-        PrintBillsManagerScript.ConfirmOrders();
-    }
-    IEnumerator UploadPDF(int PrintID, string PrintFilePath)
-    {
-        if(!File.Exists(PrintFilePath))
-        {
-            Debug.LogError("File not found = " + PrintFilePath);
-            yield break;
-        }    
-
-        byte[] pdfBytes = File.ReadAllBytes(PrintFilePath);
-
-        WWWForm form = new WWWForm();
-
-        form.AddField("PrintID", PrintID);
-
-        Debug.Log("Uploading file: " + Path.GetFileName(PrintFilePath));
-        Debug.Log("Extension: " + Path.GetExtension(PrintFilePath));
-
-        form.AddBinaryData
-        (
-            "PDF",
-            pdfBytes,
-            Path.GetFileName(PrintFilePath),
-            "application/pdf"
-        );
-
-        using (UnityWebRequest request =
-               UnityWebRequest.Post("http://localhost:3000/upload/print", form))
-        {
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError(request.error);
-                Debug.LogError(request.downloadHandler.text);
-                yield break;
-            }
-
-            UploadResponse response =
-                JsonUtility.FromJson<UploadResponse>(request.downloadHandler.text);
-
-            if (!response.Success)
-            {
-                Debug.LogError("Upload failed.");
-                yield break;
-            }
-
-            Debug.Log("Uploaded PDF for PrintID = " + PrintID);
-        }
-    }
-   
 
 
 
 
 
+
+
+
+    //==============================================================
+    //Order Downloading stuff -
+    //==============================================================
 
     // Download all Unarchived User Orders.
     public void GetOrdersForCurrentUser()
@@ -536,7 +610,7 @@ public class Scene3_Backend : MonoBehaviour
         Debug.Log("Finished downloading Archived Orders.");
     }
 
-
+    //Used by above functions.
     IEnumerator GetPrints()
     {
         Debug.Log("Downloading Prints...");
@@ -928,6 +1002,104 @@ public class Scene3_Backend : MonoBehaviour
         else
         {
             Debug.LogError(request.error);
+        }
+    }
+
+
+
+
+
+
+
+
+    //Calculate bill
+    public void CalculateBill(
+                                BillRequest request,
+                                string pdfPath,
+                                System.Action<BillResponse> callback
+                             )
+    {
+        StartCoroutine(Coroutine_CalculateBill(
+                                                    request,
+                                                    pdfPath,
+                                                    callback
+                                              ));
+    }
+
+    IEnumerator Coroutine_CalculateBill(
+                                            BillRequest request,
+                                            string pdfPath,
+                                            System.Action<BillResponse> callback
+                                       )
+    {
+        if (!File.Exists(pdfPath))
+        {
+            callback(new BillResponse
+            {
+                Success = false,
+                Message = "PDF file not found."
+            });
+
+            yield break;
+        }
+
+        byte[] pdfBytes = File.ReadAllBytes(pdfPath);
+
+        WWWForm form = new WWWForm();
+
+        //--------------------------------------------------
+        // PDF
+        //--------------------------------------------------
+
+        form.AddBinaryData(
+            "PDF",
+            pdfBytes,
+            Path.GetFileName(pdfPath),
+            "application/pdf"
+        );
+
+        //--------------------------------------------------
+        // Bill Request
+        //--------------------------------------------------
+
+        form.AddField("PagesPerSheet", request.PagesPerSheet);
+        form.AddField("SideSelection", request.SideSelection);
+        form.AddField("Color", request.Color);
+        form.AddField("Copies", request.Copies);
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Post(
+                                                                    "http://localhost:3000/calculate-bill",
+                                                                    form
+                                                                ))
+        {
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                BillResponse errorResponse;
+
+                try
+                {
+                    errorResponse = JsonUtility.FromJson<BillResponse>(
+                        webRequest.downloadHandler.text
+                    );
+                }
+                catch
+                {
+                    errorResponse = new BillResponse
+                    {
+                        Success = false,
+                        Message = webRequest.error
+                    };
+                }
+
+                callback(errorResponse);
+                yield break;
+            }
+
+            BillResponse response = JsonUtility.FromJson<BillResponse>( webRequest.downloadHandler.text );
+
+            callback(response);
         }
     }
 }

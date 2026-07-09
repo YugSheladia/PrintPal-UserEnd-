@@ -49,11 +49,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb4df9d4fd788484dbafc4c9b6cc7e55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PrintManager
-  Scene3ManagerObject: {fileID: 0}
+  Scene3ManagerScript: {fileID: 0}
+  Scene3_BackendScript: {fileID: 0}
   PrintPrefab: {fileID: 891235733007419756, guid: 19a0853cf1efcfe42985c730e1a6f6f8, type: 3}
   PrintListParent: {fileID: 7140698923879419971}
   PrintSettingsParent: {fileID: 0}
-  PrintBillsManagerObject: {fileID: 0}
+  PrintBillsManagerScript: {fileID: 0}
 --- !u!1 &1474693247889808453
 GameObject:
   m_ObjectHideFlags: 0
@@ -67,7 +68,7 @@ GameObject:
   - component: {fileID: 1647638236569976909}
   - component: {fileID: 572787984157068575}
   m_Layer: 5
-  m_Name: Print
+  m_Name: Proceed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -177,7 +178,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 3591165109798079465}
         m_TargetAssemblyTypeName: PrintManager, Assembly-CSharp
-        m_MethodName: ClickedPrintButton
+        m_MethodName: ClickedProceedButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -920,7 +921,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Print
+  m_text: 'Proceed
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2ccedcdec690c844895fdde29a27f45d, type: 2}
   m_sharedMaterial: {fileID: -6584190823593576278, guid: 2ccedcdec690c844895fdde29a27f45d, type: 2}
