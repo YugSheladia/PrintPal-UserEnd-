@@ -195,13 +195,16 @@ public class Scene2_Backend : MonoBehaviour
             Script1.StationeryName = SelectStationeryScript.StationeryName;
 
             UserInfoObject.PrintUserInfo();
+            Scene2ManagerScript.DisableAllPanels();
         }
         else
         {
             Debug.LogError(request.error);
             SelectStationeryScript.StationeryName = null;
+            Scene2ManagerScript.DisableInvisiblePanel();
         }
     }
+
 
 
 
@@ -250,6 +253,8 @@ public class Scene2_Backend : MonoBehaviour
 
                 Script1.SetUserInfo(ServerResponseObject.User);
 
+                StartCoroutine(GetStationeryName(Script1.StationeryID));
+
                 LoginScript.LoadHomePage();
 
                 Debug.Log("Unity - Sucessfully logged in.");
@@ -264,6 +269,59 @@ public class Scene2_Backend : MonoBehaviour
             Debug.LogError(request.error);
         }
     }
+
+
+
+    //Getting StationeryName after login.
+    [System.Serializable]
+    public class GetStationeryNameResponse
+    {
+        public bool     success;
+        public string   StationeryName;
+    }
+    IEnumerator GetStationeryName(int stationeryID)
+    {
+        Debug.Log("1");
+        using (UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/get-stationery-name/" + stationeryID))
+        {
+            Debug.Log("2");
+            yield return request.SendWebRequest();
+
+            Debug.Log("3");
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log("4");
+                Debug.LogError("GetStationeryName Error: " + request.error);
+                yield break;
+            }
+
+            Debug.Log("5");
+            GetStationeryNameResponse response =
+                JsonUtility.FromJson<GetStationeryNameResponse>(request.downloadHandler.text);
+
+            Debug.Log("6");
+            if (response.success)
+            {
+                Debug.Log("7");
+                Debug.Log("Stationery Name: " + response.StationeryName);
+
+                Script1.StationeryName = response.StationeryName;
+            }
+            else
+            {
+                Debug.Log("8");
+                Debug.LogError("Server Error: " + request.downloadHandler.text);
+            }
+        }
+    }
+
+
+
+
+
+
+
+
 
 
 
@@ -314,6 +372,7 @@ public class Scene2_Backend : MonoBehaviour
 
         PopulateDropdown();
 
+        Scene2ManagerScript.DisableAllPanels();
         Scene2ManagerScript.EnableSetStationeryNamePanel();
     }
     void PopulateDropdown()

@@ -12,7 +12,7 @@ public class Password : MonoBehaviour
     {
         Scene2_BackendScript.UserInfoObject.Password = PasswordInput.text;
 
-        Scene2ManagerScript.DisableAllPanels();
+        Scene2ManagerScript.EnableInvisiblePanel();
 
         Scene2_BackendScript.GetStationeries();
     }

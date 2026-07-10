@@ -21,7 +21,7 @@ public class HomePage : MonoBehaviour
 
     private void Start()
     {
-        Username.text = "Hey " + Script1.UserName + " :)";  
+        Username.text = "Hey " + Script1.UserName;  
     }
 
     public void ClickedCreateOrder()

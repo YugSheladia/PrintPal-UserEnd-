@@ -9,6 +9,7 @@ public class Scene2Manager : MonoBehaviour
     [SerializeField] private GameObject LoginPanel;
     [SerializeField] private GameObject PasswordPanel;
     [SerializeField] private GameObject SetStationeryNamePanel;
+    [SerializeField] private GameObject InvisiblePanel;
 
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
 
@@ -24,6 +25,8 @@ public class Scene2Manager : MonoBehaviour
     public void DisableAllPanels()
     {
         DisableBlankPanel();
+        DisableInvisiblePanel();
+
         DisableSetPhoneNumberPanel();
         DisableLoginPanel();
         DisablePasswordPanel();
@@ -39,6 +42,17 @@ public class Scene2Manager : MonoBehaviour
     {
         BlankPanel?.SetActive(false);
     }
+    public void EnableInvisiblePanel()
+    {
+        InvisiblePanel.SetActive(true);
+    }
+    public void DisableInvisiblePanel()
+    {
+        InvisiblePanel?.SetActive(false);
+    }
+
+
+
     public void EnableSetPhoneNumberPanel()
     {
         SetPhoneNumberPanel.SetActive(true);

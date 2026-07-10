@@ -25,7 +25,9 @@ public class Scene3Manager : MonoBehaviour
 
 
     [SerializeField] GameObject OrdersPanel;
-    //[SerializeField] GameObject OrderHistoryPanel;
+
+
+    [SerializeField] GameObject UpdateStationery2Panel;
 
 
     private void Start()
@@ -65,6 +67,7 @@ public class Scene3Manager : MonoBehaviour
         DisablePrintBillsManager();
         DisableOrderStatusManager();
         DisableOrdersPanel();
+        DisableStationeryPreferencePanel();
     }
 
 
@@ -128,5 +131,15 @@ public class Scene3Manager : MonoBehaviour
     public void DisableOrdersPanel()
     {
         OrdersPanel.SetActive(false);
+    }
+
+
+    public void EnableStationeryPreferencePanel()
+    {
+        UpdateStationery2Panel.SetActive(true);
+    }
+    public void DisableStationeryPreferencePanel()
+    {
+        UpdateStationery2Panel.SetActive(false);
     }
 }

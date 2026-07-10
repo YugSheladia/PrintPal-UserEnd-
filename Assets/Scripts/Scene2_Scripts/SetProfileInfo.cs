@@ -21,6 +21,7 @@ public class SetProfileInfo : MonoBehaviour
 
     public void ClickedSubmitButton()
     {
+        Scene2ManagerScript.EnableInvisiblePanel();
         StartCoroutine(SaveProfile());
 
         SceneManager.LoadScene("Scene3_Home");

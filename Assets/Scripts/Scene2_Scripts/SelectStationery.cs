@@ -31,9 +31,9 @@ public class SelectStationery : MonoBehaviour
         }
 
         StationeryNameSummary selected =
-            Scene2_BackendScript.StationeryResponse.Stationeries[
-                StationeryNameDropDown.value
-            ];
+                                        Scene2_BackendScript.StationeryResponse.Stationeries[
+                                                                                                StationeryNameDropDown.value
+                                                                                             ];
 
         Debug.Log
                (

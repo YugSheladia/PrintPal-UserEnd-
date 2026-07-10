@@ -1,5 +1,6 @@
 //Script6
 
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -24,7 +25,15 @@ public class PrintBillsManager : MonoBehaviour
     public float FinalBillAmount;
     public int TotalBillsCompleted;
 
+    [SerializeField] public TMP_Text StationeryName;
 
+
+
+
+    public void UpdateStationeryNameInUI()
+    {
+        StationeryName.text = Script1.StationeryName;
+    }
 
 
     public void CreateBills()
@@ -48,9 +57,6 @@ public class PrintBillsManager : MonoBehaviour
             PrintBillScript.SetBillDetailsInBillScript(Print);
 
             PrintBillScript.CalculatePrice();
-
-            //Print.EffectiveSheets   = PrintBillScript.EffectiveSheets;
-            //Print.BillAmount        = PrintBillScript.TotalPrice;
         }
     }
     public void BillsFinished(PrintBill Bill)
@@ -64,6 +70,8 @@ public class PrintBillsManager : MonoBehaviour
             CreateFinalBill();
 
             Scene3ManagerScript.DisableAllPanels();
+
+            StationeryName.text = Script1.StationeryName;
             Scene3ManagerScript.EnablePrintBillsManager();
         }
     }
@@ -121,5 +129,12 @@ public class PrintBillsManager : MonoBehaviour
         Scene3ManagerScript.CreateOrderPage();
 
         DestroyAllBills();
+    }
+
+    public void ClickedChangeStationery()
+    {
+        Scene3ManagerScript.EnableInvisiblePanel();
+
+        Scene3_BackendScript.GetStationeries();
     }
 }

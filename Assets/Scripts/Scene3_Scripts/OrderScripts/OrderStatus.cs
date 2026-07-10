@@ -32,6 +32,9 @@ public class OrderStatus : MonoBehaviour
     [SerializeField] private Image ViewDetailsObject;
     [SerializeField] private Image StatusIndicator;
 
+    [SerializeField] private GameObject StatusBox;
+    [SerializeField] private Image      StatusBoxColor;
+    [SerializeField] private TMP_Text   StatusBoxText;
 
     public OrderSummary OrderSummaryObject;
 
@@ -88,34 +91,40 @@ public class OrderStatus : MonoBehaviour
             case OrderStatusEnum.Pending:
                 OrderStatusText.text = "Queued for Printing";
 
+                StatusBoxText.text = "Pending";
                 StatusTimeStampText.text = "Created at : " + OrderSummaryObject.CreatedAt.ToString();
 
                 StatusIndicator.color = new Color32(246, 59, 57, 200);
                 OrderStatusText.color = new Color32(246, 59, 57, 200);
                 ViewDetailsObject.color = new Color32(246, 59, 57, 200);
+                StatusBoxColor.color = new Color32(246, 59, 57, 200);
                 
                 break;
 
             case OrderStatusEnum.Completed:
                 OrderStatusText.text = "Ready for Pickup";
 
-                StatusTimeStampText.text = "Completed at : " + OrderSummaryObject.CompletedAt.ToString();
+                StatusBoxText.text = "Printed";
+                StatusTimeStampText.text = "Printed at : " + OrderSummaryObject.CompletedAt.ToString();
 
                 StatusIndicator.color = new Color32(245, 207, 73, 230);
                 OrderStatusText.color = new Color32(245, 207, 73, 230);
                 ViewDetailsObject.color = new Color32(245, 207, 73, 230);
-                
+                StatusBoxColor.color = new Color32(245, 207, 73, 230);
+
                 break;
 
             case OrderStatusEnum.Collected:
-                OrderStatusText.text = "Collected";
+                OrderStatusText.text = "Has been collected";
 
+                StatusBoxText.text = "Collected";
                 StatusTimeStampText.text = "Collected at : " + OrderSummaryObject.CollectedAt.ToString();
 
                 StatusIndicator.color = new Color32(2, 141, 26, 220);
                 OrderStatusText.color = new Color32(2, 141, 26, 220);
                 ViewDetailsObject.color = new Color32(2, 141, 26, 220);
-                
+                StatusBoxColor.color = new Color32(2, 141, 26, 220);
+
                 break;                
 
             default:
@@ -128,6 +137,8 @@ public class OrderStatus : MonoBehaviour
         {
             case ArchiveEnum.Unarchived:
                 EnableUnarchivedOrderButtons_Panel();
+
+                StatusBox.SetActive(true);
                 break;
 
             case ArchiveEnum.Archived:
@@ -136,6 +147,8 @@ public class OrderStatus : MonoBehaviour
                 StatusIndicator.color = new Color32(124, 124, 124, 255);
                 OrderStatusText.color = new Color32(36, 36, 36, 150);
                 ViewDetailsObject.color = new Color32(36, 36, 36, 150);
+
+                StatusBox.SetActive(false);
 
                 break;
         }
