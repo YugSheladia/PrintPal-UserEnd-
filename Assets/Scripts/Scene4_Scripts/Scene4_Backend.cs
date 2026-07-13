@@ -101,10 +101,22 @@ public class Scene4_Backend : MonoBehaviour
             Script1.UserName                = UpdatedUserInfoObject.Username;
 
             ViewProfileInfoScript.UpdateProfileInfo();
+
+            Scene4ManagerScript.MessageText.text = "User information updated.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableViewProfileInfoPanel();
         }
         else
         {
             Debug.LogError(request.error);
+
+            Scene4ManagerScript.MessageText.text = "User not found.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableUpdateProfilePanel();
         }
     }
 
@@ -113,11 +125,7 @@ public class Scene4_Backend : MonoBehaviour
 
 
 
-    //Used for displaying user info in
-    //1. Profile Menu -> View Profile
-    //&
-    //2. Profile Menu -> View Profile -> Update Profile.
-    
+    //Used for displaying user info in Profile Menu -> View Profile
     UserInfoWrapper UserInfoWrapperObject;
     public void StartCoroutine_GetUserInfoFromServer()
     {
@@ -145,15 +153,88 @@ public class Scene4_Backend : MonoBehaviour
 
                 ViewProfileInfoScript.SetUI();
                 UpdateProfileInfoScript.SetUI();
+
+                Scene4ManagerScript.DisableAllPanels();
+                Scene4ManagerScript.EnableViewProfileInfoPanel();
             }
             else
             {
                 Debug.LogError("User not found");
+
+                Scene4ManagerScript.MessageText.text = "User not found.\nRestart the app and try again.";
+                Scene4ManagerScript.EnableMessagePanel();
+
+                Scene4ManagerScript.DisableAllPanels();
+                Scene4ManagerScript.EnableProfileMenuPanel();
             }
         }
         else
         {
             Debug.LogError(request.error);
+
+            Scene4ManagerScript.MessageText.text = "User not found.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableProfileMenuPanel();
+        }
+    }
+
+
+
+
+
+    //Used for displaying user info in Profile Menu -> View Profile -> Update Profile.
+    public void StartCoroutine_GetUserInfoFromServer2()
+    {
+        StartCoroutine(GetUserInfoFromServer2());
+    }
+    IEnumerator GetUserInfoFromServer2()
+    {
+        UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/userInfo/" + Script1.PhoneNumber);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string ServerResponseJSON = request.downloadHandler.text;
+
+            Debug.Log("Raw Server response = \n" + ServerResponseJSON);
+
+            UserInfoWrapperObject = JsonUtility.FromJson<UserInfoWrapper>(ServerResponseJSON);
+
+            if (UserInfoWrapperObject.Success)
+            {
+                Debug.Log("User info received");
+
+                Script1.SetUserInfo(UserInfoWrapperObject.UserInfo);
+
+                ViewProfileInfoScript.SetUI();
+                UpdateProfileInfoScript.SetUI();
+
+                Scene4ManagerScript.DisableAllPanels();
+                Scene4ManagerScript.EnableUpdateProfilePanel();
+            }
+            else
+            {
+                Debug.LogError("User not found");
+
+                Scene4ManagerScript.MessageText.text = "User not found.\nRestart the app and try again.";
+                Scene4ManagerScript.EnableMessagePanel();
+
+                Scene4ManagerScript.DisableAllPanels();
+                Scene4ManagerScript.EnableViewProfileInfoPanel();
+            }
+        }
+        else
+        {
+            Debug.LogError(request.error);
+
+            Scene4ManagerScript.MessageText.text = "User not found.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableViewProfileInfoPanel();
         }
     }
 
@@ -184,6 +265,13 @@ public class Scene4_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+
+            Scene4ManagerScript.MessageText.text = "An error occured.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableProfileMenuPanel();
+
             yield break;
         }
 
@@ -197,6 +285,13 @@ public class Scene4_Backend : MonoBehaviour
         if (!StationeryResponse.Success)
         {
             Debug.Log("Failed to fetch stationeries.");
+
+            Scene4ManagerScript.MessageText.text = "Failed to fetch stationeries.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableProfileMenuPanel();
+
             yield break;
         }
 
@@ -205,6 +300,13 @@ public class Scene4_Backend : MonoBehaviour
             StationeryResponse.Stationeries.Length == 0)
         {
             Debug.Log("No stationeries found.");
+
+            Scene4ManagerScript.MessageText.text = "No stationery found.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableProfileMenuPanel();
+
             yield break;
         }
 
@@ -266,6 +368,13 @@ public class Scene4_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+
+            Scene4ManagerScript.MessageText.text = "An error occured.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableUpdateStationeryPanel();
+
             yield break;
         }
 
@@ -281,12 +390,22 @@ public class Scene4_Backend : MonoBehaviour
             Script1.StationeryID = StationeryID;
             Script1.StationeryName = UpdateStationeryScript.StationeryName;
 
+            Scene4ManagerScript.MessageText.text = "Stationery updated.";
+            Scene4ManagerScript.EnableMessagePanel();
+
             Scene4ManagerScript.DisableAllPanels();
             Scene4ManagerScript.EnableProfileMenuPanel();
         }
         else
         {
             Debug.LogError(response.Message);
+
+            Scene4ManagerScript.MessageText.text = "An error occured.\nRestart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableUpdateStationeryPanel();
+
             UpdateStationeryScript.StationeryName = null;
         }
     }

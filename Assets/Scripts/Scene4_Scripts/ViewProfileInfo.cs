@@ -37,9 +37,8 @@ public class ViewProfileInfo : MonoBehaviour
 
     public void ClickedEditButton()
     {
-        UpdateProfileInfoScript.IntializeUI();
+        Scene4ManagerScript.EnableInvisiblePanel();
 
-        Scene4ManagerScript.DisableAllPanels();
-        Scene4ManagerScript.EnableUpdateProfilePanel();
+        UpdateProfileInfoScript.IntializeUI();
     }
 }

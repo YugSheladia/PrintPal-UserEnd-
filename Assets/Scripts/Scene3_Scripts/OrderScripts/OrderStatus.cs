@@ -49,13 +49,6 @@ public class OrderStatus : MonoBehaviour
 
     OrderStatusEnum orderStatusEnum;
 
-    enum ArchiveEnum
-    {
-        Unarchived,
-        Archived
-    }
-
-    ArchiveEnum archiveEnum;
 
     
 
@@ -84,7 +77,6 @@ public class OrderStatus : MonoBehaviour
     private void UpdateUI()
     {
         orderStatusEnum = (OrderStatusEnum)OrderSummaryObject.Status;
-        archiveEnum = (ArchiveEnum)OrderSummaryObject.ArchivedByUser;
 
         switch (orderStatusEnum)
         {
@@ -130,26 +122,6 @@ public class OrderStatus : MonoBehaviour
             default:
                 Debug.Log("Invalid Order Status");
                 Destroy(gameObject);
-                break;
-        }
-
-        switch (archiveEnum)
-        {
-            case ArchiveEnum.Unarchived:
-                EnableUnarchivedOrderButtons_Panel();
-
-                StatusBox.SetActive(true);
-                break;
-
-            case ArchiveEnum.Archived:
-                EnableArchiveOrderButtons_Panel();
-
-                StatusIndicator.color = new Color32(124, 124, 124, 255);
-                OrderStatusText.color = new Color32(36, 36, 36, 150);
-                ViewDetailsObject.color = new Color32(36, 36, 36, 150);
-
-                StatusBox.SetActive(false);
-
                 break;
         }
 
@@ -207,7 +179,7 @@ public class OrderStatus : MonoBehaviour
 
             PrintBill BillScript = BillObject.GetComponent<PrintBill>();
 
-            BillScript.SetRequiredScripts(Scene3_BackendScript, PrintBillsManagerScript);
+            BillScript.SetRequiredScripts(Scene3ManagerScript, Scene3_BackendScript, PrintBillsManagerScript);
             BillScript.SetBillDetailsInBillScript(Print);
             BillScript.SetBillDetailsInUI();
         }
@@ -241,40 +213,5 @@ public class OrderStatus : MonoBehaviour
 
         Scene3ManagerScript.DisableAllPanels();
         Scene3ManagerScript.HomePage();
-    }
-
-
-
-    public void DisableAllPanels()
-    {
-        ArchivedOrderButtonsPanel.SetActive(false);
-        UnarchivedOrderButtonsPanel.SetActive(false);
-    }
-    public void EnableArchiveOrderButtons_Panel()
-    {
-        DisableAllPanels();
-        ArchivedOrderButtonsPanel.SetActive(true);
-    }
-    public void EnableUnarchivedOrderButtons_Panel()
-    {
-        DisableAllPanels();
-        UnarchivedOrderButtonsPanel.SetActive(true);
-    }
-
-
-
-    public void ClickedArchiveButton()
-    {
-        Scene3_BackendScript.SetOrderAsArchived(OrderSummaryObject.OrderID);
-
-        UpdateUI();
-        Destroy(gameObject);
-    }
-    public void ClickedUnarchiveButton()
-    {
-        Scene3_BackendScript.SetOrderAsUnarchived(OrderSummaryObject.OrderID);
-
-        UpdateUI();
-        Destroy(gameObject);
     }
 }

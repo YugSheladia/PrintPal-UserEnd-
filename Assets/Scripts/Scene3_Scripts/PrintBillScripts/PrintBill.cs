@@ -29,6 +29,7 @@ public class BillResponse
 
 public class PrintBill : MonoBehaviour
 {
+    Scene3Manager       Scene3ManagerScript;
     Scene3_Backend      Scene3_BackendScript;
     PrintBillsManager   PrintBillsManagerScript;
 
@@ -60,10 +61,12 @@ public class PrintBill : MonoBehaviour
 
 
     public void SetRequiredScripts(
+                                        Scene3Manager Scene3ManagerScript,
                                         Scene3_Backend Scene3_BackendScript, 
                                         PrintBillsManager PrintBillsManagerScript
                                   )
     {
+        this.Scene3ManagerScript        = Scene3ManagerScript;
         this.Scene3_BackendScript       = Scene3_BackendScript;
         this.PrintBillsManagerScript    = PrintBillsManagerScript;
     }
@@ -121,9 +124,28 @@ public class PrintBill : MonoBehaviour
     }
     private void OnBillCalculated(BillResponse response)
     {
+        if (response == null)
+        {
+            Debug.LogError(response.Message);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
+            return;
+        }
         if (!response.Success)
         {
             Debug.LogError(response.Message);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
             return;
         }
 

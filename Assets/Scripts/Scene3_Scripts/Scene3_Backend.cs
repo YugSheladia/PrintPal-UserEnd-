@@ -276,14 +276,47 @@ public class Scene3_Backend : MonoBehaviour
         yield return ValidateAllPDFs();
 
 
-        if (!OperationSucceeded) yield break;
+        if (!OperationSucceeded)
+        {
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Debug.Log("fffff");
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
+            yield break;
+        }
+
         yield return UploadAllPrints();
 
 
-        if (!OperationSucceeded) yield break;
+        if (!OperationSucceeded)
+        {
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Debug.Log("gggg");
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
+            yield break;
+        }
+        
         yield return SubmitOrder();
 
-        if(!OperationSucceeded) yield break;
+        if (!OperationSucceeded)
+        {
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Debug.Log("hhhhh");
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
+            yield break;
+        }
+
         Debug.Log("Done");
 
         PrintBillsManagerScript.ConfirmOrder();
@@ -297,6 +330,10 @@ public class Scene3_Backend : MonoBehaviour
             {
                 Debug.LogError("File does not exist:\n" + print.PDFFilePath);
                 OperationSucceeded = false;
+
+                Scene3ManagerScript.MessageText.text = "PDF could not be found";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 yield break;
             }
 
@@ -304,6 +341,10 @@ public class Scene3_Backend : MonoBehaviour
             {
                 Debug.LogError("Not a PDF:\n" + print.PDFFilePath);
                 OperationSucceeded = false;
+
+                Scene3ManagerScript.MessageText.text = "File is of incorrect extension";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 yield break;
             }
 
@@ -313,6 +354,10 @@ public class Scene3_Backend : MonoBehaviour
             {
                 Debug.LogError("PDF is empty:\n" + print.PDFFilePath);
                 OperationSucceeded = false;
+
+                Scene3ManagerScript.MessageText.text = "PDF is empty";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 yield break;
             }
 
@@ -329,6 +374,10 @@ public class Scene3_Backend : MonoBehaviour
             {
                 Debug.LogError("Invalid PDF:\n" + print.PDFFilePath);
                 OperationSucceeded = false;
+
+                Scene3ManagerScript.MessageText.text = "Invalid PDF.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 yield break;
             }
         }
@@ -338,23 +387,45 @@ public class Scene3_Backend : MonoBehaviour
 
     IEnumerator UploadAllPrints()
     {
+        Debug.Log("1");
         foreach (PrintDetails print in PrintManagerScript.PrintDetailsList)
         {
+            Debug.Log("2");
             if (!File.Exists(print.PDFFilePath))
             {
+                Debug.Log("3");
                 Debug.LogError("File not found:\n" + print.PDFFilePath);
+
+                Debug.Log("4");
                 OperationSucceeded = false;
+
+                Debug.Log("5");
+                Scene3ManagerScript.MessageText.text = "PDF could not be found";
+
+                Debug.Log("6");
+                Scene3ManagerScript.EnableMessagePanel();
+
+                Debug.Log("7");
+                Scene3ManagerScript.DisableAllPanels();
+
+                Debug.Log("8");
+                Scene3ManagerScript.EnablePrintBillsManager();
+
+                Debug.Log("9");
                 yield break;
             }
 
+            Debug.Log("10");
             byte[] pdfBytes = File.ReadAllBytes(print.PDFFilePath);
 
+            Debug.Log("11");
             WWWForm form = new WWWForm();
 
             //--------------------------------------------------
             // PDF
             //--------------------------------------------------
 
+            Debug.Log("12");
             form.AddBinaryData(
                 "PDF",
                 pdfBytes,
@@ -366,6 +437,7 @@ public class Scene3_Backend : MonoBehaviour
             // Print information
             //--------------------------------------------------
 
+            Debug.Log("13");
             form.AddField("PrintNumber", print.PrintNumber);
 
             form.AddField("PDFName", Path.GetFileName(print.PDFFilePath));
@@ -383,56 +455,96 @@ public class Scene3_Backend : MonoBehaviour
 
             form.AddField("EffectiveSheets", print.EffectiveSheets);
 
+            Debug.Log("14");
             //Looks weird, but this is just to avoid issues the bill amount being a float value. 
-            form.AddField("BillAmount", print.BillAmount.ToString(CultureInfo.InvariantCulture));   
+            form.AddField("BillAmount", print.BillAmount.ToString(CultureInfo.InvariantCulture));
 
+            Debug.Log("15");
             using (UnityWebRequest request = UnityWebRequest.Post(
                                                                     "http://localhost:3000/upload-print", form)
                                                                  )
             {
+                Debug.Log("16");
                 yield return request.SendWebRequest();
 
+                Debug.Log("17");
                 if (request.result != UnityWebRequest.Result.Success)
                 {
+                    Debug.Log("18");
                     Debug.LogError(request.error);
 
                     if (!string.IsNullOrEmpty(request.downloadHandler.text))
                     {
+                        Debug.Log("19");
                         Debug.LogError(request.downloadHandler.text);
+
+                        Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                        Scene3ManagerScript.EnableMessagePanel();
+
+                        Debug.Log("29");
+                        Scene3ManagerScript.DisableAllPanels();
+                        Scene3ManagerScript.EnablePrintBillsManager();
                     }
 
+                    Debug.Log("20");
                     OperationSucceeded = false;
+
+                    Debug.Log("21");
+                    Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+
+                    Debug.Log("22");
+                    Scene3ManagerScript.EnableMessagePanel();
+
+                    Debug.Log("23");
+                    Scene3ManagerScript.DisableAllPanels();
+
+                    Debug.Log("24");
+                    Scene3ManagerScript.EnablePrintBillsManager();
+
+                    Debug.Log("25");
                     yield break;
                 }
 
+                Debug.Log("26");
                 UploadResponse response = JsonUtility.FromJson<UploadResponse>(request.downloadHandler.text);
 
                 if (!response.Success)
                 {
+                    Debug.Log("27");
                     Debug.LogError(response.Message);
                     OperationSucceeded = false;
+
+                    Debug.Log("28");
+                    Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                    Scene3ManagerScript.EnableMessagePanel();
+
+                    Debug.Log("29");
+                    Scene3ManagerScript.DisableAllPanels();
+                    Scene3ManagerScript.EnablePrintBillsManager();
+
                     yield break;
                 }
 
                 //--------------------------------------------------
                 // Save PrintID for CreateOrder()
                 //--------------------------------------------------
-
+                Debug.Log("31");
                 CurrentOrderRequest.PrintIDs.Add(response.PrintID);
 
                 //--------------------------------------------------
                 // Optional: update local data
                 //--------------------------------------------------
-
+                Debug.Log("32");
                 print.PrintID   = response.PrintID;     //Added by me.
                 print.Pages     = response.TotalPages;
                 print.FileSize  = response.FileSize;
                 print.PDFName   = response.PDFName;
 
+                Debug.Log("33");
                 Debug.Log($"Uploaded Print #{print.PrintNumber} (ID = {response.PrintID})");
             }
         }
-
+        Debug.Log("34");
         Debug.Log("All prints uploaded successfully.");
     }
 
@@ -469,6 +581,10 @@ public class Scene3_Backend : MonoBehaviour
             }
 
             OperationSucceeded = false;
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             yield break;
         }
 
@@ -480,6 +596,10 @@ public class Scene3_Backend : MonoBehaviour
         {
             Debug.LogError(CurrentOrderResponse.Message);
             OperationSucceeded = false;
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             yield break;
         }
 
@@ -503,7 +623,7 @@ public class Scene3_Backend : MonoBehaviour
     //Order Downloading stuff -
     //==============================================================
 
-    // Download all Unarchived User Orders.
+    // Download all User Orders.
     public void GetOrdersForCurrentUser()
     {
         StartCoroutine(GetOrders());
@@ -529,6 +649,10 @@ public class Scene3_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             yield break;
         }
 
@@ -542,6 +666,10 @@ public class Scene3_Backend : MonoBehaviour
         if (Response == null || !Response.Success)
         {
             Debug.LogError("Failed to download orders.");
+
+            Scene3ManagerScript.MessageText.text = "Failed to download orders, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             yield break;
         }
 
@@ -558,17 +686,12 @@ public class Scene3_Backend : MonoBehaviour
 
         Debug.Log("Finished downloading Orders.");
     }
-
-    // Downlaod All Archived User Orders.
-    public void GetArchivedOrdersForCurrentUser()
+    public void GetRecentOrders()
     {
-        StartCoroutine(GetArchivedOrders());
+        StartCoroutine(GetRecentOrdersFromServer());
     }
-    IEnumerator GetArchivedOrders()
+    IEnumerator GetRecentOrdersFromServer()
     {
-        Debug.Log("Downloading Orders...");
-
-        // Clear previously downloaded data.
         ConfirmedOrders.Orders.Clear();
         ConfirmedPrints.Prints.Clear();
         ConfirmedPrintSettings.PrintSettings.Clear();
@@ -576,7 +699,7 @@ public class Scene3_Backend : MonoBehaviour
 
         UnityWebRequest request = UnityWebRequest.Get
                                                   (
-                                                        $"http://localhost:3000/userOrders/archived?UserID={Script1.UserID}"
+                                                        $"http://localhost:3000/get-active-orders/{Script1.UserID}"
                                                   );
 
         yield return request.SendWebRequest();
@@ -584,6 +707,13 @@ public class Scene3_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnableHomePage();
+
             yield break;
         }
 
@@ -597,6 +727,13 @@ public class Scene3_Backend : MonoBehaviour
         if (Response == null || !Response.Success)
         {
             Debug.LogError("Failed to download orders.");
+
+            Scene3ManagerScript.MessageText.text = "Failed to download orders, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnableHomePage();
+
             yield break;
         }
 
@@ -611,8 +748,76 @@ public class Scene3_Backend : MonoBehaviour
 
         yield return StartCoroutine(GetPrints());
 
-        Debug.Log("Finished downloading Archived Orders.");
+        Debug.Log("Finished downloading recent Orders.");
     }
+    public void GetCollectedOrders()
+    {
+        StartCoroutine(GetCollectedOrdersFromServer());
+    }
+    IEnumerator GetCollectedOrdersFromServer()
+    {
+        ConfirmedOrders.Orders.Clear();
+        ConfirmedPrints.Prints.Clear();
+        ConfirmedPrintSettings.PrintSettings.Clear();
+        ConfirmedPrintBills.PrintBills.Clear();
+
+        UnityWebRequest request = UnityWebRequest.Get
+                                                  (
+                                                        $"http://localhost:3000/get-collected-orders/{Script1.UserID}"
+                                                  );
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnableHomePage();
+
+            yield break;
+        }
+
+        Debug.Log(request.downloadHandler.text);
+
+        OrderSummaryWrapper Response = JsonUtility.FromJson<OrderSummaryWrapper>
+                                                   (
+                                                        request.downloadHandler.text
+                                                   );
+
+        if (Response == null || !Response.Success)
+        {
+            Debug.LogError("Failed to download orders.");
+
+            Scene3ManagerScript.MessageText.text = "Failed to download orders, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnableHomePage();
+
+            yield break;
+        }
+
+        ConfirmedOrders.Orders.AddRange(Response.Orders);
+
+        Debug.Log
+        (
+            "Downloaded "
+            + ConfirmedOrders.Orders.Count
+            + " Orders."
+        );
+
+        yield return StartCoroutine(GetPrints());
+
+        Debug.Log("Finished downloading Collected Orders.");
+    }
+
+
+
+
 
     //Used by above functions.
     IEnumerator GetPrints()
@@ -632,6 +837,10 @@ public class Scene3_Backend : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(request.error);
+
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 continue;
             }
 
@@ -644,6 +853,9 @@ public class Scene3_Backend : MonoBehaviour
 
             if (Response == null)
             {
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 continue;
             }
 
@@ -681,6 +893,10 @@ public class Scene3_Backend : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(request.error);
+
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 continue;
             }
 
@@ -693,6 +909,9 @@ public class Scene3_Backend : MonoBehaviour
 
             if (Response == null)
             {
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 continue;
             }
 
@@ -727,6 +946,10 @@ public class Scene3_Backend : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(request.error);
+
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 continue;
             }
 
@@ -739,6 +962,9 @@ public class Scene3_Backend : MonoBehaviour
 
             if (Response == null)
             {
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 continue;
             }
 
@@ -857,6 +1083,16 @@ public class Scene3_Backend : MonoBehaviour
 
 
 
+    
+
+
+
+
+
+
+
+
+
     //Gettings the name of the stationery to which the order is assigned.
     [System.Serializable]
     public class GetStationeryNameRequest
@@ -899,6 +1135,10 @@ public class Scene3_Backend : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(request.error);
+
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
                 yield break;
             }
 
@@ -914,100 +1154,14 @@ public class Scene3_Backend : MonoBehaviour
             else
             {
                 Debug.LogError(response.Message);
+
+                Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
             }
         }
     }
 
 
-
-
-
-
-
-    //Setting Orders as Archived / Unarchived
-    [System.Serializable]
-    public class OrderIDRequest
-    {
-        public int OrderID;
-    }
-
-    public void SetOrderAsArchived(int OrderID)
-    {
-        StartCoroutine(Coroutine_SetOrderAsArchived(OrderID));
-    }
-    IEnumerator Coroutine_SetOrderAsArchived(int OrderID)
-    {
-        OrderIDRequest requestBody = new();
-        requestBody.OrderID = OrderID;
-
-        string json = JsonUtility.ToJson(requestBody);
-
-        byte[] body = System.Text.Encoding.UTF8.GetBytes(json);
-
-        UnityWebRequest request = new UnityWebRequest(
-                                                            "http://localhost:3000/order/user-archive",
-                                                            "POST"
-                                                      );
-
-        request.uploadHandler = new UploadHandlerRaw(body);
-
-        request.downloadHandler = new DownloadHandlerBuffer();
-
-        request.SetRequestHeader(
-                                    "Content-Type",
-                                    "application/json"
-                                );
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log("Order marked as Archived.");
-        }
-        else
-        {
-            Debug.LogError(request.error);
-        }
-    }
-
-    public void SetOrderAsUnarchived(int OrderID)
-    {
-        StartCoroutine(Coroutine_SetOrderAsUnarchived(OrderID));
-    }
-    IEnumerator Coroutine_SetOrderAsUnarchived(int OrderID)
-    {
-        OrderIDRequest requestBody = new();
-        requestBody.OrderID = OrderID;
-
-        string json = JsonUtility.ToJson(requestBody);
-
-        byte[] body = System.Text.Encoding.UTF8.GetBytes(json);
-
-        UnityWebRequest request = new UnityWebRequest(
-                                                            "http://localhost:3000/order/user-unarchive",
-                                                            "POST"
-                                                      );
-
-        request.uploadHandler = new UploadHandlerRaw(body);
-
-        request.downloadHandler = new DownloadHandlerBuffer();
-
-        request.SetRequestHeader(
-                                    "Content-Type",
-                                    "application/json"
-                                );
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log("Order marked as Unarchived.");
-        }
-        else
-        {
-            Debug.LogError(request.error);
-        }
-    }
 
 
 
@@ -1043,6 +1197,12 @@ public class Scene3_Backend : MonoBehaviour
                 Success = false,
                 Message = "PDF file not found."
             });
+
+            Scene3ManagerScript.MessageText.text = "PDF could not be found, make sure all selected PDFs still exist.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintManager();
 
             yield break;
         }
@@ -1097,6 +1257,12 @@ public class Scene3_Backend : MonoBehaviour
                     };
                 }
 
+                Scene3ManagerScript.MessageText.text = "An error ocurred, try restarting the app.";
+                Scene3ManagerScript.EnableMessagePanel();
+
+                Scene3ManagerScript.DisableAllPanels();
+                Scene3ManagerScript.EnablePrintManager();
+
                 callback(errorResponse);
                 yield break;
             }
@@ -1138,6 +1304,13 @@ public class Scene3_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
             yield break;
         }
 
@@ -1151,6 +1324,13 @@ public class Scene3_Backend : MonoBehaviour
         if (!StationeryResponse.Success)
         {
             Debug.Log("Failed to fetch stationeries.");
+
+            Scene3ManagerScript.MessageText.text = "Failed to fetch stationeries, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
             yield break;
         }
 
@@ -1159,6 +1339,13 @@ public class Scene3_Backend : MonoBehaviour
             StationeryResponse.Stationeries.Length == 0)
         {
             Debug.Log("No stationeries found.");
+
+            Scene3ManagerScript.MessageText.text = "No stationeries found, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnablePrintBillsManager();
+
             yield break;
         }
 
@@ -1219,6 +1406,13 @@ public class Scene3_Backend : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(request.error);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            Scene3ManagerScript.DisableAllPanels();
+            Scene3ManagerScript.EnableStationeryPreferencePanel();
+
             yield break;
         }
 
@@ -1242,6 +1436,10 @@ public class Scene3_Backend : MonoBehaviour
         else
         {
             Debug.LogError(response.Message);
+
+            Scene3ManagerScript.MessageText.text = "An error occured, try restarting the app.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             Scene3ManagerScript.DisableInvisiblePanel();
         }
     }

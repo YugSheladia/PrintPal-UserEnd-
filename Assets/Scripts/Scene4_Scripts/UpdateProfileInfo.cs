@@ -21,7 +21,7 @@ public class UpdateProfileInfo : MonoBehaviour
 
     public void IntializeUI()
     {
-        Scene4_BackendScript.StartCoroutine_GetUserInfoFromServer();
+        Scene4_BackendScript.StartCoroutine_GetUserInfoFromServer2();
     }
     public void SetUI()
     {
@@ -35,10 +35,6 @@ public class UpdateProfileInfo : MonoBehaviour
     public void ClickedSubmitButton()
     {
         SaveProfile();
-        ViewProfileInfoScript.UpdateProfileInfo();
-
-        Scene4ManagerScript.DisableAllPanels();
-        Scene4ManagerScript.EnableViewProfileInfoPanel();
     }
 
     public void ClickedPreviousPage()

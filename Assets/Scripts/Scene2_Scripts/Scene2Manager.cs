@@ -1,3 +1,5 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class Scene2Manager : MonoBehaviour
@@ -11,16 +13,21 @@ public class Scene2Manager : MonoBehaviour
     [SerializeField] private GameObject SetStationeryNamePanel;
     [SerializeField] private GameObject InvisiblePanel;
 
+    [SerializeField] private GameObject ErrorPanel;
+    [SerializeField] public TMP_Text ErrorText;
+
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
 
 
     private void Start()
     {
-        //EnableSetPhoneNumberPanel();
-
         EnableLoginPanel();
         DisableBlankPanel();
     }
+
+
+
+
 
     public void DisableAllPanels()
     {
@@ -33,6 +40,9 @@ public class Scene2Manager : MonoBehaviour
         DisableSetProfileInfoPanel();
         DisableSetStationeryNamePanel();
     }
+
+
+
 
     public void EnableBlankPanel()
     {
@@ -92,6 +102,25 @@ public class Scene2Manager : MonoBehaviour
     public void DisableSetStationeryNamePanel()
     {
         SetStationeryNamePanel?.SetActive(false);
-    }    
+    }
+
+
+
+    public void EnableErrorPanel()
+    {
+        StartCoroutine(CoroutineEnableErrorPanel());
+    }
+    IEnumerator CoroutineEnableErrorPanel()
+    {
+        ErrorPanel.SetActive(true);
+
+        yield return new WaitForSeconds(5);
+
+        DisableErrorPanel();
+    }
+    public void DisableErrorPanel()
+    {
+        ErrorPanel?.SetActive(false);
+    }
 }
 

@@ -53,7 +53,7 @@ public class PrintBillsManager : MonoBehaviour
 
             PrintBill PrintBillScript = PrintBillObject.GetComponent<PrintBill>();
 
-            PrintBillScript.SetRequiredScripts(Scene3_BackendScript, this);
+            PrintBillScript.SetRequiredScripts(Scene3ManagerScript ,Scene3_BackendScript, this);
             PrintBillScript.SetBillDetailsInBillScript(Print);
 
             PrintBillScript.CalculatePrice();

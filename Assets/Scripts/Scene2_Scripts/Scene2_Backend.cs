@@ -3,6 +3,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 
 //Wrapper class for Phone Number Response from server
@@ -137,8 +138,6 @@ public class Scene2_Backend : MonoBehaviour
         {
             string ServerResponseJSON = request.downloadHandler.text;
 
-            Debug.Log("Raw Server Response : \n" + ServerResponseJSON);
-
             PhoneNumberAvailabilityResponse ServerResponseObject = JsonUtility.FromJson<PhoneNumberAvailabilityResponse>(ServerResponseJSON);
 
             if(ServerResponseObject.Success == true)
@@ -148,11 +147,20 @@ public class Scene2_Backend : MonoBehaviour
             }
             else
             {
-                Debug.Log("Number already taken.");
+                Scene2ManagerScript.DisableAllPanels();
+                Scene2ManagerScript.EnableSetPhoneNumberPanel();
+                Scene2ManagerScript.EnableErrorPanel();
+
+                Scene2ManagerScript.ErrorText.text = "Phone number already taken.";
             }
         }
         else
         {
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetPhoneNumberPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Error: " + request.error + "\nRestart the app and try again.";
             Debug.LogError(request.error);
         }
     }
@@ -186,22 +194,25 @@ public class Scene2_Backend : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             string ServerResponseJSON = request.downloadHandler.text;
-            Debug.Log("Raw Server Response : \n" + ServerResponseJSON);
 
             UserInfoRecieved UserInfoRecievedObject = JsonUtility.FromJson<UserInfoRecieved>(ServerResponseJSON);
+
             UserInfoObject.UserID = UserInfoRecievedObject.UserID;
 
             Script1.SetUserInfo(UserInfoObject);
             Script1.StationeryName = SelectStationeryScript.StationeryName;
 
-            UserInfoObject.PrintUserInfo();
-            Scene2ManagerScript.DisableAllPanels();
+            SceneManager.LoadScene("Scene3_Home");
         }
         else
         {
-            Debug.LogError(request.error);
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetProfileInfoPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Error: " + request.error + "\nRestart the app and try again.";
+
             SelectStationeryScript.StationeryName = null;
-            Scene2ManagerScript.DisableInvisiblePanel();
         }
     }
 
@@ -223,52 +234,64 @@ public class Scene2_Backend : MonoBehaviour
 
         byte[] LoginInfoRaw = System.Text.Encoding.UTF8.GetBytes(LoginInfoJSON);
 
-        UnityWebRequest request = new UnityWebRequest(
-                                                        "http://localhost:3000/userLogin", 
-                                                        "POST"
-                                                     );
+        UnityWebRequest request = new UnityWebRequest
+        (
+            "http://localhost:3000/userLogin",
+            "POST"
+        );
 
         request.uploadHandler = new UploadHandlerRaw(LoginInfoRaw);
-
         request.downloadHandler = new DownloadHandlerBuffer();
 
-        request.SetRequestHeader(
-                                "Content-Type",
-                                "application/json"
-                                );
+        request.SetRequestHeader
+        (
+            "Content-Type",
+            "application/json"
+        );
 
         yield return request.SendWebRequest();
 
-        if (request.result == UnityWebRequest.Result.Success)
+        string ServerResponse = request.downloadHandler.text;
+
+        //Debug.Log("Raw server response =\n" + ServerResponse);
+
+        LoginVerificationResponseFromServer ServerResponseObject =
+            JsonUtility.FromJson<LoginVerificationResponseFromServer>(ServerResponse);
+
+        if (request.responseCode == 200)
         {
-            string ServerResponse = request.downloadHandler.text;
-            Debug.Log("Raw server response =\n" + ServerResponse);
+            Debug.Log("User info received");
 
-            LoginVerificationResponseFromServer ServerResponseObject = 
-                JsonUtility.FromJson<LoginVerificationResponseFromServer>(ServerResponse);
+            Script1.SetUserInfo(ServerResponseObject.User);
 
-            if(ServerResponseObject.Success == true)
-            {
-                Debug.Log("User info received");
+            yield return StartCoroutine(GetStationeryName(Script1.StationeryID));
 
-                Script1.SetUserInfo(ServerResponseObject.User);
+            LoginScript.LoadHomePage();
 
-                StartCoroutine(GetStationeryName(Script1.StationeryID));
-
-                LoginScript.LoadHomePage();
-
-                Debug.Log("Unity - Sucessfully logged in.");
-            }
-            else
-            {
-                Debug.Log("Unity - Incorrect Login information.");
-            }
+            Debug.Log("Unity - Successfully logged in.");
         }
         else
         {
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableLoginPanel();
+  
+            if (ServerResponseObject != null)
+            {
+                Scene2ManagerScript.ErrorText.text = ServerResponseObject.Message;
+            }
+            else
+            {
+                Scene2ManagerScript.ErrorText.text = "An unknown error occurred.\nRestart the app and try again.";
+            }
+
             Debug.LogError(request.error);
         }
     }
+
+
+
 
 
 
@@ -281,36 +304,41 @@ public class Scene2_Backend : MonoBehaviour
     }
     IEnumerator GetStationeryName(int stationeryID)
     {
-        Debug.Log("1");
         using (UnityWebRequest request = UnityWebRequest.Get("http://localhost:3000/get-stationery-name/" + stationeryID))
         {
-            Debug.Log("2");
             yield return request.SendWebRequest();
 
-            Debug.Log("3");
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.Log("4");
                 Debug.LogError("GetStationeryName Error: " + request.error);
+
+                Scene2ManagerScript.ErrorText.text = "An error occured, restart the app and try again.";
+                Scene2ManagerScript.EnableErrorPanel();
+
+                Scene2ManagerScript.DisableAllPanels();
+                Scene2ManagerScript.EnableLoginPanel();
+
                 yield break;
             }
 
-            Debug.Log("5");
             GetStationeryNameResponse response =
                 JsonUtility.FromJson<GetStationeryNameResponse>(request.downloadHandler.text);
 
-            Debug.Log("6");
             if (response.success)
             {
-                Debug.Log("7");
                 Debug.Log("Stationery Name: " + response.StationeryName);
 
                 Script1.StationeryName = response.StationeryName;
             }
             else
             {
-                Debug.Log("8");
                 Debug.LogError("Server Error: " + request.downloadHandler.text);
+
+                Scene2ManagerScript.ErrorText.text = "An error occured, restart the app and try again.";
+                Scene2ManagerScript.EnableErrorPanel();
+
+                Scene2ManagerScript.DisableAllPanels();
+                Scene2ManagerScript.EnableLoginPanel();
             }
         }
     }
@@ -343,30 +371,43 @@ public class Scene2_Backend : MonoBehaviour
 
         yield return request.SendWebRequest();
 
-        if (request.result != UnityWebRequest.Result.Success)
+        if (request.result != UnityWebRequest.Result.Success) 
         {
-            Debug.LogError(request.error);
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnablePasswordPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Error: Unsuccessful Web Request\nRestart the app and try again.";
+
             yield break;
         }
-
-        Debug.Log(request.downloadHandler.text);
         
         StationeryResponse =
             JsonUtility.FromJson<GetStationeriesResponse>(
                                                              request.downloadHandler.text
                                                          );
 
-        if (!StationeryResponse.Success)
+        if (!StationeryResponse.Success) 
         {
-            Debug.Log("Failed to fetch stationeries.");
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnablePasswordPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Error: Failed to fetch stationeries\nRestart the app and try again.";
+
             yield break;
         }
 
         if (StationeryResponse.Stationeries == null 
             ||
-            StationeryResponse.Stationeries.Length == 0)
+            StationeryResponse.Stationeries.Length == 0)      
         {
-            Debug.Log("No stationeries found.");
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnablePasswordPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Error: No stationeries found\nRestart the app and try again.";
+
             yield break;
         }
 

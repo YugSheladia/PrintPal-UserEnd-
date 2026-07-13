@@ -12,21 +12,24 @@ public class ProfileMenu : MonoBehaviour
 
     public void ClickedViewProfileInfo()
     {
-        ViewProfileInfoScript.UpdateProfileInfo();
+        Scene4ManagerScript.EnableInvisiblePanel();
 
-        Scene4ManagerScript.DisableAllPanels();
-        Scene4ManagerScript.EnableViewProfileInfoPanel();
+        ViewProfileInfoScript.UpdateProfileInfo();
     }
 
 
     public void ClickedStationery()
     {
+        Scene4ManagerScript.EnableInvisiblePanel();
+
         Scene4_BackendScript.GetStationeries();
     }
 
 
     public void ClickedLogout()
     {
+        Scene4ManagerScript.EnableInvisiblePanel();
+
         Script1.SetUserInfo(null);
 
         SceneManager.LoadScene("Scene1_Loading+Landing");
@@ -35,6 +38,8 @@ public class ProfileMenu : MonoBehaviour
 
     public void ClickedPreviousPage()
     {
+        Scene4ManagerScript.EnableInvisiblePanel();
+
         SceneManager.LoadScene("Scene3_Home");
     }
 

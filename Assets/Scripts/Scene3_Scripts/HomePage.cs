@@ -21,7 +21,10 @@ public class HomePage : MonoBehaviour
 
     private void Start()
     {
-        Username.text = "Hey " + Script1.UserName;  
+        Username.text = "Hey " + Script1.UserName;
+
+        Scene3ManagerScript.MessageText.text = "Hello " + Script1.UserName;
+        Scene3ManagerScript.EnableMessagePanel();
     }
 
     public void ClickedCreateOrder()
@@ -32,12 +35,15 @@ public class HomePage : MonoBehaviour
     public void ClickedRecentOrders()
     {
         Scene3ManagerScript.EnableInvisiblePanel();
-        Scene3_BackendScript.GetOrdersForCurrentUser();
+
+        Scene3_BackendScript.GetRecentOrders();
     }
 
     public void ClickedOrderHistory()
     {
-        Scene3_BackendScript.GetArchivedOrdersForCurrentUser();
+        Scene3ManagerScript.EnableInvisiblePanel();
+
+        Scene3_BackendScript.GetCollectedOrders();
     }
 
     public void ClickedViewProfile()

@@ -18,7 +18,12 @@ public class SelectStationery : MonoBehaviour
         if (Scene2_BackendScript.StationeryResponse == null ||
             Scene2_BackendScript.StationeryResponse.Stationeries == null)
         {
-            Debug.LogError("Stationery list has not been loaded.");
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetStationeryNamePanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Stationery list could'nt load.\nRestart the app and try again.";
+
             return;
         }
 
@@ -26,7 +31,12 @@ public class SelectStationery : MonoBehaviour
             StationeryNameDropDown.value >=
             Scene2_BackendScript.StationeryResponse.Stationeries.Length)
         {
-            Debug.LogError("Invalid stationery selected.");
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetStationeryNamePanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Invalid Stationery selected.\nRestart the app and try again.";
+
             return;
         }
 
@@ -35,10 +45,6 @@ public class SelectStationery : MonoBehaviour
                                                                                                 StationeryNameDropDown.value
                                                                                              ];
 
-        Debug.Log
-               (
-                    $"Selected: {selected.StationeryName} (ID = {selected.StationeryID})"
-               );
 
         // Store the selected StationeryID in the user's info.
         Scene2_BackendScript.UserInfoObject.StationeryID = selected.StationeryID;

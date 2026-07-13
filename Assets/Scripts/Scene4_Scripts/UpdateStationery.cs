@@ -21,6 +21,13 @@ public class UpdateStationery : MonoBehaviour
             Scene4_BackendScript.StationeryResponse.Stationeries == null)
         {
             Debug.LogError("Stationery list has not been loaded.");
+
+            Scene4ManagerScript.MessageText.text = "\"Stationery list has not been loaded. Restart the app and try again.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableProfileMenuPanel();
+
             return;
         }
 
@@ -29,6 +36,13 @@ public class UpdateStationery : MonoBehaviour
             Scene4_BackendScript.StationeryResponse.Stationeries.Length)
         {
             Debug.LogError("Invalid stationery selected.");
+
+            Scene4ManagerScript.MessageText.text = "Invalid stationery selected. Restart the app if you think this is a mistake.";
+            Scene4ManagerScript.EnableMessagePanel();
+
+            Scene4ManagerScript.DisableAllPanels();
+            Scene4ManagerScript.EnableUpdateStationeryPanel();
+
             return;
         }
 

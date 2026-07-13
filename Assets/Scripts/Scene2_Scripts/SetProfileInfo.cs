@@ -16,15 +16,16 @@ public class SetProfileInfo : MonoBehaviour
     private string UserEmail;
     private string Username;
 
-    [SerializeField] private Scene2Manager  Scene2ManagerScript;
+    [SerializeField] private Scene2Manager Scene2ManagerScript;
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
 
     public void ClickedSubmitButton()
     {
-        Scene2ManagerScript.EnableInvisiblePanel();
-        StartCoroutine(SaveProfile());
-
-        SceneManager.LoadScene("Scene3_Home");
+        if (CheckProfileDetails())
+        {
+            Scene2ManagerScript.EnableInvisiblePanel();
+            StartCoroutine(SaveProfile());
+        }
     }
 
     public void ClickedPreviousPage()
@@ -34,19 +35,121 @@ public class SetProfileInfo : MonoBehaviour
 
         Scene2_BackendScript.GetStationeries();
     }
-    
+
     public IEnumerator SaveProfile()
     {
-        UserActualName      = NameField.text.Trim();
-        UserUPIPhoneNumber  = UPIPhoneField.text.Trim();
-        UserEmail           = EmailField.text.Trim();
-        Username            = UsernameField.text.Trim();
+        UserActualName = NameField.text.Trim();
+        UserUPIPhoneNumber = UPIPhoneField.text.Trim();
+        UserEmail = EmailField.text.Trim();
+        Username = UsernameField.text.Trim();
 
-        Scene2_BackendScript.UserInfoObject.Name        = UserActualName;
-        Scene2_BackendScript.UserInfoObject.UPINumber   = UserUPIPhoneNumber;
-        Scene2_BackendScript.UserInfoObject.Email       = UserEmail;
-        Scene2_BackendScript.UserInfoObject.Username    = Username;
+        Scene2_BackendScript.UserInfoObject.Name = UserActualName;
+        Scene2_BackendScript.UserInfoObject.UPINumber = UserUPIPhoneNumber;
+        Scene2_BackendScript.UserInfoObject.Email = UserEmail;
+        Scene2_BackendScript.UserInfoObject.Username = Username;
 
         yield return Scene2_BackendScript.SubmitUserInfoToServer();
     }
+
+
+
+
+
+
+
+
+    public bool CheckProfileDetails()
+    {
+        if(!CheckNameLength())
+        {
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetProfileInfoPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Name field is empty.";
+
+            return false;
+        }
+        if(!CheckUPINumberLength())
+        {
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetProfileInfoPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "UPI Number has to be of 10 digits.";
+
+            return false;
+        }
+        if (!CheckEmailLength())
+        {
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetProfileInfoPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Email field is empty.";
+
+            return false;
+        }
+        if (!CheckUsernameLength())
+        {
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetProfileInfoPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Username field is empty.";
+
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+
+    public bool CheckNameLength()
+    {
+        if (NameField.text.Length <= 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    public bool CheckUPINumberLength()
+    {
+        if (UPIPhoneField.text.Length != 10)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    public bool CheckEmailLength()
+    {
+        if (EmailField.text.Length <= 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    public bool CheckUsernameLength()
+    {
+        if (UsernameField.text.Length <= 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }
+

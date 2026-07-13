@@ -13,18 +13,43 @@ public class SetPhoneNumber : MonoBehaviour
 
     public void ClickedSubmitButton()
     {
-        print("Clicked Submit Button.");
+        Scene2ManagerScript.EnableInvisiblePanel();
 
-        PhoneNumber = PhoneNumberInputField.text;
+        if(CheckPhoneNumberLength())
+        {
+            PhoneNumber = PhoneNumberInputField.text;
 
-        Scene2_BackendScript.UserInfoObject.PhoneNumber = PhoneNumber;
+            Scene2_BackendScript.UserInfoObject.PhoneNumber = PhoneNumber;
 
-        Scene2_BackendScript.CheckPhoneNumberAvailability();
+            Scene2_BackendScript.CheckPhoneNumberAvailability();
+        }
+        else
+        {
+            Scene2ManagerScript.DisableAllPanels();
+            Scene2ManagerScript.EnableSetPhoneNumberPanel();
+            Scene2ManagerScript.EnableErrorPanel();
+
+            Scene2ManagerScript.ErrorText.text = "Phone number has to be of 10 digits.";
+        }
     }
 
     public void ClickedPreviousPageButton()
     {
         Scene2ManagerScript.DisableAllPanels();
         Scene2ManagerScript.EnableLoginPanel();
+    }
+
+
+
+    public bool CheckPhoneNumberLength()
+    {
+        if(PhoneNumberInputField.text.Length != 10)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 }

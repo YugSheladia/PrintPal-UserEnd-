@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using System.Collections;
 
 public class Scene4Manager : MonoBehaviour
 {
@@ -9,6 +11,21 @@ public class Scene4Manager : MonoBehaviour
     [SerializeField] private GameObject UpdateStationeryPanel;
     [SerializeField] private GameObject UpdateProfileInfoPanel;
 
+    [SerializeField] public GameObject InvisiblePanel;
+
+    [SerializeField] public GameObject  MessagePanel;
+    [SerializeField] public TMP_Text    MessageText;
+
+
+
+
+
+
+
+
+
+
+
     private void Start()
     {
         DisableAllPanels();
@@ -16,14 +33,30 @@ public class Scene4Manager : MonoBehaviour
     }
 
 
+
+
+
+
+
     public void DisableAllPanels()
     {
         DisableBlankPanel();
+
         DisableProfileMenuPanel();
         DisableViewProfileInfoPanel();
         DisableUpdateStationeryPanel();
         DisableUpdateProfilePanel();
+
+        DisableInvisiblePanel();
     }
+
+
+
+
+
+
+
+
 
     public void EnableBlankPanel()
     {
@@ -33,6 +66,18 @@ public class Scene4Manager : MonoBehaviour
     {
         BlankPanel?.SetActive(false);
     }
+    public void EnableInvisiblePanel()
+    {
+        InvisiblePanel.SetActive(true);
+    }
+    public void DisableInvisiblePanel()
+    {
+        InvisiblePanel.SetActive(false);
+    }
+
+
+
+
     public void EnableProfileMenuPanel()
     {
         ProfileMenuPanel.SetActive(true);
@@ -65,5 +110,23 @@ public class Scene4Manager : MonoBehaviour
     {
         UpdateProfileInfoPanel.SetActive(false);
     }
-    
+
+
+
+
+    public void EnableMessagePanel()
+    {
+        StartCoroutine(CoroutineEnableMessagePanel());
+    }
+    public void DisableMessagePanel()
+    {
+        MessagePanel.SetActive(false);
+    }
+    IEnumerator CoroutineEnableMessagePanel()
+    {
+        MessagePanel.SetActive(true);
+        yield return new WaitForSeconds(5);
+
+        DisableMessagePanel();
+    }
 }

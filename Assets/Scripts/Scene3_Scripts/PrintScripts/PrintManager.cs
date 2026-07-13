@@ -198,13 +198,17 @@ public class PrintManager : MonoBehaviour
     {
         if (PrintDetailsList.Count <= 0)
         {
-            print("Atleast 1 print is required.");
+            Scene3ManagerScript.MessageText.text = "Atleast 1 print is required to proceed.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             return;
         }
 
         if(!AllPrintsHavePDFsAttached())
         {
-            print("A PDF must be attached to every print.");
+            Scene3ManagerScript.MessageText.text = "A PDF must be attached to each print.";
+            Scene3ManagerScript.EnableMessagePanel();
+
             return;
         }
 

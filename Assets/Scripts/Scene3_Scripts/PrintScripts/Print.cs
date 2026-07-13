@@ -33,6 +33,11 @@ public class Print : MonoBehaviour
 
 
 
+    [SerializeField] public GameObject PDFNotAttachedPanel;
+    [SerializeField] public GameObject PDFAttachedPanel;
+
+
+
 
 
     //functions called by PrintManager ->
@@ -85,6 +90,9 @@ public class Print : MonoBehaviour
                 PrintDetailsObject.PDFName = Path.GetFileName(path);
 
                 PDFNameText.text = Path.GetFileName(path);
+
+                PDFNotAttachedPanel.SetActive(false);
+                PDFAttachedPanel.SetActive(true);
             },
             new string[]
             {

@@ -1,5 +1,7 @@
 //Script1
 
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class Scene3Manager : MonoBehaviour
@@ -30,16 +32,23 @@ public class Scene3Manager : MonoBehaviour
     [SerializeField] GameObject UpdateStationery2Panel;
 
 
+    [SerializeField] public GameObject MessagePanel;
+    [SerializeField] public TMP_Text MessageText;
+
+
+
+
     private void Start()
     {
         HomePage();
     }
 
+
+
     public void HomePage()
     {
-        Debug.Log("Called HomePage()");
         DisableAllPanels();
-        EnableHomePage();  
+        EnableHomePage();
     }
     public void CreateOrderPage()
     {
@@ -79,7 +88,7 @@ public class Scene3Manager : MonoBehaviour
     public void DisableBlank()
     {
         BlankPanelObject.SetActive(false);
-    } 
+    }
     public void EnableInvisiblePanel()
     {
         InvisiblePanel.SetActive(true);
@@ -93,7 +102,6 @@ public class Scene3Manager : MonoBehaviour
 
     public void EnableHomePage()
     {
-        Debug.Log("Called EnableHomePage()");
         HomePageObject.SetActive(true);
     }
     public void DisableHomePage()
@@ -141,5 +149,23 @@ public class Scene3Manager : MonoBehaviour
     public void DisableStationeryPreferencePanel()
     {
         UpdateStationery2Panel.SetActive(false);
+    }
+
+
+
+    public void EnableMessagePanel()
+    {
+        MessagePanel.SetActive(true);
+        StartCoroutine(CoroutineEnableMessagePanel());
+    }
+    public void DisableMessagePanel()
+    {
+        MessagePanel.SetActive(false);
+    }
+    IEnumerator CoroutineEnableMessagePanel()
+    {
+        yield return new WaitForSeconds(5);
+
+        DisableMessagePanel();
     }
 }
