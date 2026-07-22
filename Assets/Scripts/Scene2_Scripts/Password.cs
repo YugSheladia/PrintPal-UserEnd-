@@ -8,7 +8,13 @@ public class Password : MonoBehaviour
     [SerializeField] private Scene2Manager Scene2ManagerScript;
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
 
+    [SerializeField] private SetProfileInfo SetProfileInfoScript;
+
     
+
+
+
+
     
     public void ClickedSubmitButton()
     {
@@ -16,17 +22,36 @@ public class Password : MonoBehaviour
 
         if(CheckPasswordLength())
         {
-            Scene2_BackendScript.UserInfoObject.Password = PasswordInput.text;
+            SetProfileInfoScript.UserInfoObject.Password = PasswordInput.text;
 
-            Scene2_BackendScript.GetStationeries();
+            Scene2_BackendScript.GetStationeries
+            (
+                Success =>
+                {
+                    if (Success)
+                    {
+                        Scene2ManagerScript.DisableAllPanels();
+
+                        Scene2ManagerScript.EnableSetStationeryNamePanel();
+                    }
+                    else
+                    {
+                        Scene2ManagerScript.DisableAllPanels();
+
+                        Scene2ManagerScript.EnableMessagePanel();
+                        Scene2ManagerScript.EnablePasswordPanel();
+                    }
+                }
+            );
         }
         else
         {
             Scene2ManagerScript.DisableAllPanels();
-            Scene2ManagerScript.EnablePasswordPanel();
-            Scene2ManagerScript.EnableErrorPanel();
 
-            Scene2ManagerScript.ErrorText.text = "Password has to contain more than 9 characters.";
+            Scene2ManagerScript.EnablePasswordPanel();
+            Scene2ManagerScript.EnableMessagePanel();
+
+            Scene2ManagerScript.MessageText.text = "Password has to contain more than 9 characters.";
         }
     }
 
@@ -35,8 +60,6 @@ public class Password : MonoBehaviour
         Scene2ManagerScript.DisableAllPanels();
         Scene2ManagerScript.EnableSetPhoneNumberPanel();
     }
-
-
 
     public bool CheckPasswordLength()
     {

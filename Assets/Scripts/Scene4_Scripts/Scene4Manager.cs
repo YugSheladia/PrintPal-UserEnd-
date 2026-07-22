@@ -41,13 +41,14 @@ public class Scene4Manager : MonoBehaviour
     public void DisableAllPanels()
     {
         DisableBlankPanel();
+        DisableInvisiblePanel();
 
         DisableProfileMenuPanel();
         DisableViewProfileInfoPanel();
         DisableUpdateStationeryPanel();
         DisableUpdateProfilePanel();
 
-        DisableInvisiblePanel();
+        DisableMessagePanel();
     }
 
 
@@ -114,19 +115,36 @@ public class Scene4Manager : MonoBehaviour
 
 
 
+
+
+
+    private Coroutine MessagePanelCoroutine;
     public void EnableMessagePanel()
     {
-        StartCoroutine(CoroutineEnableMessagePanel());
+        if (MessagePanelCoroutine != null)
+        {
+            StopCoroutine(MessagePanelCoroutine);
+        }
+
+        MessagePanel.SetActive(true);
+
+        MessagePanelCoroutine = StartCoroutine(CoroutineMessagePanelHandler());
     }
     public void DisableMessagePanel()
     {
+        if (MessagePanelCoroutine != null)
+        {
+            StopCoroutine(MessagePanelCoroutine);
+            MessagePanelCoroutine = null;
+        }
+
         MessagePanel.SetActive(false);
     }
-    IEnumerator CoroutineEnableMessagePanel()
+    IEnumerator CoroutineMessagePanelHandler()
     {
-        MessagePanel.SetActive(true);
         yield return new WaitForSeconds(5);
 
-        DisableMessagePanel();
+        MessagePanel.SetActive(false);
+        MessagePanelCoroutine = null;
     }
 }

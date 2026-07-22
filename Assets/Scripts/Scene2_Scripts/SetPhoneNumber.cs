@@ -9,35 +9,66 @@ public class SetPhoneNumber : MonoBehaviour
     [SerializeField] private Scene2Manager  Scene2ManagerScript;
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
 
+    [SerializeField] private SetProfileInfo SetProfileInfoScript;
+
     public string PhoneNumber;
+    UserInfo UserInfoObject;
+
+
+
+
 
     public void ClickedSubmitButton()
     {
         Scene2ManagerScript.EnableInvisiblePanel();
 
-        if(CheckPhoneNumberLength())
+        UserInfoObject = new UserInfo();
+
+        if (CheckPhoneNumberLength())
         {
             PhoneNumber = PhoneNumberInputField.text;
 
-            Scene2_BackendScript.UserInfoObject.PhoneNumber = PhoneNumber;
+            UserInfoObject.PhoneNumber = PhoneNumber;
 
-            Scene2_BackendScript.CheckPhoneNumberAvailability();
+            Scene2_BackendScript.CheckPhoneNumberAvailability
+            (
+                UserInfoObject,
+                Success =>
+                {
+                    if (Success)
+                    {
+                        SetProfileInfoScript.UserInfoObject.PhoneNumber = PhoneNumber;
+
+                        Scene2ManagerScript.DisableAllPanels();
+                        Scene2ManagerScript.EnablePasswordPanel();
+                    }
+                    else
+                    {
+                        Scene2ManagerScript.DisableAllPanels();
+
+                        Scene2ManagerScript.EnableSetPhoneNumberPanel();
+                        Scene2ManagerScript.EnableMessagePanel();
+                    }
+                }
+            );
         }
         else
         {
             Scene2ManagerScript.DisableAllPanels();
-            Scene2ManagerScript.EnableSetPhoneNumberPanel();
-            Scene2ManagerScript.EnableErrorPanel();
 
-            Scene2ManagerScript.ErrorText.text = "Phone number has to be of 10 digits.";
+            Scene2ManagerScript.EnableSetPhoneNumberPanel();
+            Scene2ManagerScript.EnableMessagePanel();
+
+            Scene2ManagerScript.MessageText.text = "Phone number has to be of 10 digits.";
         }
     }
-
     public void ClickedPreviousPageButton()
     {
         Scene2ManagerScript.DisableAllPanels();
         Scene2ManagerScript.EnableLoginPanel();
     }
+
+
 
 
 

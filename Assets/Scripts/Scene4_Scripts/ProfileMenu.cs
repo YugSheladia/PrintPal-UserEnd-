@@ -22,7 +22,25 @@ public class ProfileMenu : MonoBehaviour
     {
         Scene4ManagerScript.EnableInvisiblePanel();
 
-        Scene4_BackendScript.GetStationeries();
+        Scene4_BackendScript.GetStationeries
+        (
+            Success =>
+            {
+                if (Success)
+                {
+                    Scene4ManagerScript.DisableAllPanels();
+                    
+                    Scene4ManagerScript.EnableUpdateStationeryPanel();
+                }
+                else
+                {
+                    Scene4ManagerScript.DisableAllPanels();
+
+                    Scene4ManagerScript.EnableMessagePanel();
+                    Scene4ManagerScript.EnableProfileMenuPanel();
+                }
+            }
+        );
     }
 
 

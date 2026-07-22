@@ -29,10 +29,18 @@ public class Login : MonoBehaviour
     [SerializeField] Scene2_Backend Scene2_BackendScript;
 
 
+
+
+
+
     public void ClickedSubmitButton()
     {
+        Scene2ManagerScript.EnableInvisiblePanel();
+
         if(CheckLoginInfo())
         {
+            Debug.Log("Appropriately filled all fields.");
+
             Scene2ManagerScript.EnableInvisiblePanel();
 
             PhoneNumber = PhoneNumberInput.text;
@@ -40,24 +48,43 @@ public class Login : MonoBehaviour
 
             LoginInfo LoginInfoObject = new LoginInfo(PhoneNumber, Password);
 
-            Scene2_BackendScript.VerifyLoginInfo(LoginInfoObject);
+            Scene2_BackendScript.VerifyLoginInfo
+            (
+                LoginInfoObject,
+                Success =>
+                {
+                    if (Success)
+                    {
+                        LoadHomePage();
+                    }
+                    else
+                    {
+                        Scene2ManagerScript.DisableAllPanels();
+
+                        Scene2ManagerScript.EnableLoginPanel();
+                        Scene2ManagerScript.EnableMessagePanel();
+                    }
+                }
+            );
         }
         else
         {
-            Scene2ManagerScript.EnableErrorPanel();
+            Debug.Log("Some field is wrongly filled.");
 
             Scene2ManagerScript.DisableAllPanels();
+
+            Scene2ManagerScript.EnableMessagePanel();
             Scene2ManagerScript.EnableLoginPanel();
         }
         
     }
-
-
     public void ClickedCreateAccountButton()
     {
         Scene2ManagerScript.DisableAllPanels();
         Scene2ManagerScript.EnableSetPhoneNumberPanel();
     }
+
+
 
 
     public void LoadHomePage()
@@ -85,14 +112,14 @@ public class Login : MonoBehaviour
     {
         if (PhoneNumberInput.text.Length <= 0)
         {
-            Scene2ManagerScript.ErrorText.text = "Phone number field can't be empty.";
+            Scene2ManagerScript.MessageText.text = "Phone number field can't be empty.";
 
             return false;
 
         }
         if (PhoneNumberInput.text.Length != 10)
         {
-            Scene2ManagerScript.ErrorText.text = "Phone number has to be of 10 digits.";
+            Scene2ManagerScript.MessageText.text = "Phone number has to be of 10 digits.";
 
             return false;
 
@@ -104,7 +131,7 @@ public class Login : MonoBehaviour
     {
         if (PasswordInput.text.Length <= 0)
         {
-            Scene2ManagerScript.ErrorText.text = "Password field can't be empty.";
+            Scene2ManagerScript.MessageText.text = "Password field can't be empty.";
 
             return false;
         }

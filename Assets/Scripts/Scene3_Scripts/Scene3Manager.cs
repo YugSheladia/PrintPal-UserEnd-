@@ -153,6 +153,9 @@ public class Scene3Manager : MonoBehaviour
 
 
 
+
+
+    /*
     public void EnableMessagePanel()
     {
         MessagePanel.SetActive(true);
@@ -167,5 +170,38 @@ public class Scene3Manager : MonoBehaviour
         yield return new WaitForSeconds(5);
 
         DisableMessagePanel();
+    }
+    */
+
+
+
+    private Coroutine MessagePanelCoroutine;
+    public void EnableMessagePanel()
+    {
+        if (MessagePanelCoroutine != null)
+        {
+            StopCoroutine(MessagePanelCoroutine);
+        }
+
+        MessagePanel.SetActive(true);
+
+        MessagePanelCoroutine = StartCoroutine(CoroutineMessagePanelHandler());
+    }
+    public void DisableMessagePanel()
+    {
+        if (MessagePanelCoroutine != null)
+        {
+            StopCoroutine(MessagePanelCoroutine);
+            MessagePanelCoroutine = null;
+        }
+
+        MessagePanel.SetActive(false);
+    }
+    IEnumerator CoroutineMessagePanelHandler()
+    {
+        yield return new WaitForSeconds(5);
+
+        MessagePanel.SetActive(false);
+        MessagePanelCoroutine = null;
     }
 }

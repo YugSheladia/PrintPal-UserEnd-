@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using NUnit.Framework;
 
 public class ViewProfileInfo : MonoBehaviour
 {
@@ -15,9 +16,34 @@ public class ViewProfileInfo : MonoBehaviour
 
     [SerializeField] UpdateProfileInfo UpdateProfileInfoScript;
 
+
+
+
+
+
     public void UpdateProfileInfo()
     {
-        Scene4_BackendScript.StartCoroutine_GetUserInfoFromServer();
+        Scene4_BackendScript.GetUserInfoFromServer
+        (
+            Success =>
+            {
+                if(Success)
+                {
+                    SetUI();
+                    UpdateProfileInfoScript.SetUI();
+
+                    Scene4ManagerScript.DisableAllPanels();
+                    Scene4ManagerScript.EnableViewProfileInfoPanel();
+                }
+                else
+                {
+                    Scene4ManagerScript.DisableAllPanels();
+
+                    Scene4ManagerScript.EnableMessagePanel();
+                    Scene4ManagerScript.EnableProfileMenuPanel();
+                }
+            }
+        );
     }
 
     public void SetUI()

@@ -65,13 +65,13 @@ public class PrintDetails
     public string PDFName; 
     public string PDFFilePath;
 
-    public PageSelectionEnum    PageSelection   = PageSelectionEnum.AllPages;
-    public SideSelectionEnum    SideSelection   = SideSelectionEnum.SingleSided;
-    public CollatedOrNotEnum    CollatedOrNot   = CollatedOrNotEnum.Collated;
-    public OrientationEnum      Orientation     = OrientationEnum.Portrait;
-    public MarginEnum           Margin          = MarginEnum.Normal;
-    public PagesPerSheetEnum    PagesPerSheet   = PagesPerSheetEnum._1;
-    public ColorEnum            Color           = ColorEnum.BlackAndWhite;
+    public PageSelectionEnum    PageSelection   = PageSelectionEnum .AllPages;
+    public SideSelectionEnum    SideSelection   = SideSelectionEnum .DoubleSided;
+    public CollatedOrNotEnum    CollatedOrNot   = CollatedOrNotEnum .Collated;
+    public OrientationEnum      Orientation     = OrientationEnum   .Portrait;
+    public MarginEnum           Margin          = MarginEnum        .Normal;
+    public PagesPerSheetEnum    PagesPerSheet   = PagesPerSheetEnum ._1;
+    public ColorEnum            Color           = ColorEnum         .BlackAndWhite;
 
     public int Copies = 1;
     public int Pages;
@@ -150,7 +150,15 @@ public class PrintManager : MonoBehaviour
 
     public void AddOrder()
     {
-        GameObject  NewPrint = Instantiate(PrintPrefab, PrintListParent);
+        if(PrintDetailsList.Count > 4)
+        {
+            Scene3ManagerScript.MessageText.text = "Each order can contain up to 5 prints only.";
+            Scene3ManagerScript.EnableMessagePanel();
+
+            return;
+        }
+        
+        GameObject NewPrint = Instantiate(PrintPrefab, PrintListParent);
         Print       PrintScript = NewPrint.GetComponent<Print>();
 
         PrintDetails NewPrintDetails = new();

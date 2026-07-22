@@ -7,10 +7,18 @@ public class SelectStationery : MonoBehaviour
     [SerializeField] Scene2Manager Scene2ManagerScript;
     [SerializeField] Scene2_Backend Scene2_BackendScript;
 
+    [SerializeField] SetProfileInfo SetProfileInfoScript;
+
     [SerializeField] public TMP_Dropdown StationeryNameDropDown;
 
 
     public string StationeryName;
+
+
+    
+
+
+
 
 
     public void ClickedSubmitButton()
@@ -20,9 +28,9 @@ public class SelectStationery : MonoBehaviour
         {
             Scene2ManagerScript.DisableAllPanels();
             Scene2ManagerScript.EnableSetStationeryNamePanel();
-            Scene2ManagerScript.EnableErrorPanel();
+            Scene2ManagerScript.EnableMessagePanel();
 
-            Scene2ManagerScript.ErrorText.text = "Stationery list could'nt load.\nRestart the app and try again.";
+            Scene2ManagerScript.MessageText.text = "Stationery list could'nt load.\nRestart the app and try again.";
 
             return;
         }
@@ -33,9 +41,9 @@ public class SelectStationery : MonoBehaviour
         {
             Scene2ManagerScript.DisableAllPanels();
             Scene2ManagerScript.EnableSetStationeryNamePanel();
-            Scene2ManagerScript.EnableErrorPanel();
+            Scene2ManagerScript.EnableMessagePanel();
 
-            Scene2ManagerScript.ErrorText.text = "Invalid Stationery selected.\nRestart the app and try again.";
+            Scene2ManagerScript.MessageText.text = "Invalid Stationery selected.\nRestart the app and try again.";
 
             return;
         }
@@ -47,7 +55,7 @@ public class SelectStationery : MonoBehaviour
 
 
         // Store the selected StationeryID in the user's info.
-        Scene2_BackendScript.UserInfoObject.StationeryID = selected.StationeryID;
+        SetProfileInfoScript.UserInfoObject.StationeryID = selected.StationeryID;
         StationeryName = selected.StationeryName;
 
         Scene2ManagerScript.DisableAllPanels();

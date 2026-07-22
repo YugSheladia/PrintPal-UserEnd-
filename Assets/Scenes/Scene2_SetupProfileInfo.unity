@@ -1410,6 +1410,7 @@ MonoBehaviour:
   PhoneNumberInputField: {fileID: 1891112415}
   Scene2ManagerScript: {fileID: 1472515211}
   Scene2_BackendScript: {fileID: 1472515212}
+  SetProfileInfoScript: {fileID: 1508638245}
   PhoneNumber: 
 --- !u!1 &250040754
 GameObject:
@@ -3124,6 +3125,7 @@ MonoBehaviour:
   PasswordInput: {fileID: 1019082302}
   Scene2ManagerScript: {fileID: 1472515211}
   Scene2_BackendScript: {fileID: 1472515212}
+  SetProfileInfoScript: {fileID: 1508638245}
 --- !u!1 &678206377
 GameObject:
   m_ObjectHideFlags: 0
@@ -3469,6 +3471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SelectStationery
   Scene2ManagerScript: {fileID: 1472515211}
   Scene2_BackendScript: {fileID: 1472515212}
+  SetProfileInfoScript: {fileID: 1508638245}
   StationeryNameDropDown: {fileID: 273565985}
   StationeryName: 
 --- !u!1 &862454112
@@ -6210,8 +6213,8 @@ MonoBehaviour:
   PasswordPanel: {fileID: 619839486}
   SetStationeryNamePanel: {fileID: 808186603}
   InvisiblePanel: {fileID: 1048359619}
-  ErrorPanel: {fileID: 1603190938}
-  ErrorText: {fileID: 1511578602}
+  MessagePanel: {fileID: 1603190938}
+  MessageText: {fileID: 1511578602}
   Scene2_BackendScript: {fileID: 1472515212}
 --- !u!114 &1472515212
 MonoBehaviour:
@@ -6228,15 +6231,6 @@ MonoBehaviour:
   Scene2ManagerScript: {fileID: 1472515211}
   SelectStationeryScript: {fileID: 808186607}
   LoginScript: {fileID: 1812965835527499270}
-  UserInfoObject:
-    PhoneNumber: 
-    Password: 
-    Name: 
-    UPINumber: 
-    Email: 
-    Username: 
-    StationeryID: 0
-    UserID: 0
   StationeryResponse:
     Success: 0
     Stationeries: []
@@ -6526,6 +6520,15 @@ MonoBehaviour:
   UsernameField: {fileID: 1076298751}
   Scene2ManagerScript: {fileID: 1472515211}
   Scene2_BackendScript: {fileID: 1472515212}
+  UserInfoObject:
+    PhoneNumber: 
+    Password: 
+    Name: 
+    UPINumber: 
+    Email: 
+    Username: 
+    StationeryID: 0
+    UserID: 0
 --- !u!1 &1510399436
 GameObject:
   m_ObjectHideFlags: 0
@@ -6695,7 +6698,7 @@ GameObject:
   - component: {fileID: 1511578603}
   - component: {fileID: 1511578602}
   m_Layer: 5
-  m_Name: ErrorText (TMP)
+  m_Name: MessageText (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

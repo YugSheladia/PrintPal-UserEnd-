@@ -13,8 +13,8 @@ public class Scene2Manager : MonoBehaviour
     [SerializeField] private GameObject SetStationeryNamePanel;
     [SerializeField] private GameObject InvisiblePanel;
 
-    [SerializeField] private GameObject ErrorPanel;
-    [SerializeField] public TMP_Text ErrorText;
+    [SerializeField] private GameObject MessagePanel;
+    [SerializeField] public TMP_Text MessageText;
 
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
 
@@ -39,6 +39,8 @@ public class Scene2Manager : MonoBehaviour
         DisablePasswordPanel();
         DisableSetProfileInfoPanel();
         DisableSetStationeryNamePanel();
+
+        DisableMessagePanel();
     }
 
 
@@ -106,21 +108,39 @@ public class Scene2Manager : MonoBehaviour
 
 
 
-    public void EnableErrorPanel()
-    {
-        StartCoroutine(CoroutineEnableErrorPanel());
-    }
-    IEnumerator CoroutineEnableErrorPanel()
-    {
-        ErrorPanel.SetActive(true);
 
+
+
+
+
+    private Coroutine MessagePanelCoroutine;
+    public void EnableMessagePanel()
+    {
+        if (MessagePanelCoroutine != null)
+        {
+            StopCoroutine(MessagePanelCoroutine);
+        }
+
+        MessagePanel.SetActive(true);
+
+        MessagePanelCoroutine = StartCoroutine(CoroutineMessagePanelHandler());
+    }
+    public void DisableMessagePanel()
+    {
+        if (MessagePanelCoroutine != null)
+        {
+            StopCoroutine(MessagePanelCoroutine);
+            MessagePanelCoroutine = null;
+        }
+
+        MessagePanel.SetActive(false);
+    }
+    IEnumerator CoroutineMessagePanelHandler()
+    {
         yield return new WaitForSeconds(5);
 
-        DisableErrorPanel();
-    }
-    public void DisableErrorPanel()
-    {
-        ErrorPanel?.SetActive(false);
+        MessagePanel.SetActive(false);
+        MessagePanelCoroutine = null;
     }
 }
 

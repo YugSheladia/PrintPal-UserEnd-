@@ -2605,7 +2605,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.94509804, g: 0.87058824, b: 0.76862746, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3631,8 +3631,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5079960530957580347, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -455
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079960530957580347, guid: e8a32597ccedd4642babcdd89e3d9c18, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 715
+      value: 622
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3801,7 +3805,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7925501163540703666, guid: 2d5898b1f8f126f4c8f455fc6c105334, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -78.367386
+      value: 1.6326141
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3966,7 +3970,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7153959573615993788, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 476
+      value: 486.5
       objectReference: {fileID: 0}
     - target: {fileID: 7575935678615476181, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: Scene3ManagerScript
@@ -3998,11 +4002,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8626057999338883507, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -324
+      value: -313.5
       objectReference: {fileID: 0}
     - target: {fileID: 9121967887476321889, guid: 6a69c37900120384ea75e7d11d2688b7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 76
+      value: 86.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

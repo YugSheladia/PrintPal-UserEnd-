@@ -17,6 +17,8 @@ public class UpdateStationery : MonoBehaviour
 
     public void ClickedSubmitButton()
     {
+        Scene4ManagerScript.EnableInvisiblePanel();
+
         if (Scene4_BackendScript.StationeryResponse == null ||
             Scene4_BackendScript.StationeryResponse.Stationeries == null)
         {
@@ -57,7 +59,28 @@ public class UpdateStationery : MonoBehaviour
                );
 
         StationeryName = selected.StationeryName;
-        StartCoroutine(Scene4_BackendScript.UpdateStationeryPreference(selected.StationeryID));
+
+        Scene4_BackendScript.UpdateStationeryPreference
+        (
+            selected.StationeryID,
+            Success =>
+            {
+                if(Success)
+                {
+                    Scene4ManagerScript.DisableAllPanels();
+
+                    Scene4ManagerScript.EnableMessagePanel();
+                    Scene4ManagerScript.EnableProfileMenuPanel();
+                }
+                else
+                {
+                    Scene4ManagerScript.DisableAllPanels();
+
+                    Scene4ManagerScript.EnableMessagePanel();
+                    Scene4ManagerScript.EnableUpdateStationeryPanel();
+                }
+            }
+        );
     }
 
     public void ClickedPreviousPage()
