@@ -132,10 +132,11 @@ public class PrintBill : MonoBehaviour
             Scene3ManagerScript.EnableMessagePanel();
 
             Scene3ManagerScript.DisableAllPanels();
-            Scene3ManagerScript.EnablePrintBillsManager();
+            Scene3ManagerScript.EnablePrintManager(); //
 
             return;
         }
+
         if (!response.Success)
         {
             Debug.LogError(response.Message);
@@ -144,7 +145,7 @@ public class PrintBill : MonoBehaviour
             Scene3ManagerScript.EnableMessagePanel();
 
             Scene3ManagerScript.DisableAllPanels();
-            Scene3ManagerScript.EnablePrintBillsManager();
+            Scene3ManagerScript.EnablePrintManager(); //
 
             return;
         }

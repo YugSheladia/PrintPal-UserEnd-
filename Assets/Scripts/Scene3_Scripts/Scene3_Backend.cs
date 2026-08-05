@@ -255,7 +255,7 @@ public class Scene3_Backend : MonoBehaviour
 
 
 
-    bool OperationSucceeded = true;
+    bool OperationSucceeded;
 
     public void CreateOrder()
     {
@@ -264,6 +264,11 @@ public class Scene3_Backend : MonoBehaviour
 
     IEnumerator CreateOrderRoutine()
     {
+        //Very important : Setting OperationSucceded = true.
+        //Say the user clicks on Pay, and for some reason, due to some error, OperationSucceeded becomes false.
+        //If the user clicks on Pay again, it is important that OperationSucceeded is reset, hence the following line of code.
+        OperationSucceeded = true;
+
         CurrentOrderRequest = new CreateOrderRequest();
 
         CurrentOrderRequest.UserID          = Script1.UserID;
