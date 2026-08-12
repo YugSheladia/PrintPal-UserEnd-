@@ -4,6 +4,7 @@ using TMPro;
 public class Password : MonoBehaviour
 {
     [SerializeField] private TMP_InputField PasswordInput;
+    [SerializeField] private TMP_InputField PasswordInput2;
 
     [SerializeField] private Scene2Manager Scene2ManagerScript;
     [SerializeField] private Scene2_Backend Scene2_BackendScript;
@@ -20,7 +21,7 @@ public class Password : MonoBehaviour
     {
         Scene2ManagerScript.EnableInvisiblePanel();
 
-        if(CheckPasswordLength())
+        if(CheckPasswordLength() && CheckPasswordSameness())
         {
             SetProfileInfoScript.UserInfoObject.Password = PasswordInput.text;
 
@@ -50,8 +51,6 @@ public class Password : MonoBehaviour
 
             Scene2ManagerScript.EnablePasswordPanel();
             Scene2ManagerScript.EnableMessagePanel();
-
-            Scene2ManagerScript.MessageText.text = "Password has to contain more than 9 characters.";
         }
     }
 
@@ -61,12 +60,28 @@ public class Password : MonoBehaviour
         Scene2ManagerScript.EnableSetPhoneNumberPanel();
     }
 
+
+
     public bool CheckPasswordLength()
     {
         if (PasswordInput.text.Length <= 9)
         {
+            Scene2ManagerScript.MessageText.text = "Password has to contain more than 9 characters.";
+
             return false;
         }
+        return true;
+    }
+
+    public bool CheckPasswordSameness()
+    {
+        if (PasswordInput.text != PasswordInput2.text)
+        {
+            Scene2ManagerScript.MessageText.text = "Passwords are not matching.";
+
+            return false;
+        }
+
         return true;
     }
 }
