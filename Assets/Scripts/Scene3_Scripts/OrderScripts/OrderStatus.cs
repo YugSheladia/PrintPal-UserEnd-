@@ -88,7 +88,7 @@ public class OrderStatus : MonoBehaviour
 
                 StatusIndicator.color = new Color32(246, 59, 57, 200);
                 OrderStatusText.color = new Color32(246, 59, 57, 200);
-                ViewDetailsObject.color = new Color32(246, 59, 57, 200);
+                //ViewDetailsObject.color = new Color32(246, 59, 57, 200);
                 StatusBoxColor.color = new Color32(246, 59, 57, 200);
                 
                 break;
@@ -101,7 +101,7 @@ public class OrderStatus : MonoBehaviour
 
                 StatusIndicator.color = new Color32(245, 207, 73, 230);
                 OrderStatusText.color = new Color32(245, 207, 73, 230);
-                ViewDetailsObject.color = new Color32(245, 207, 73, 230);
+                //ViewDetailsObject.color = new Color32(245, 207, 73, 230);
                 StatusBoxColor.color = new Color32(245, 207, 73, 230);
 
                 break;
@@ -114,7 +114,7 @@ public class OrderStatus : MonoBehaviour
 
                 StatusIndicator.color = new Color32(2, 141, 26, 220);
                 OrderStatusText.color = new Color32(2, 141, 26, 220);
-                ViewDetailsObject.color = new Color32(2, 141, 26, 220);
+                //ViewDetailsObject.color = new Color32(2, 141, 26, 220);
                 StatusBoxColor.color = new Color32(2, 141, 26, 220);
 
                 break;                

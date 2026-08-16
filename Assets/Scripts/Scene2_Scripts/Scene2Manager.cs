@@ -1,16 +1,21 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Scene2Manager : MonoBehaviour
 {
     [SerializeField] private GameObject BlankPanel;
 
+    [SerializeField] private GameObject LandingPagePanel;
+
     [SerializeField] private GameObject SetPhoneNumberPanel;
     [SerializeField] private GameObject SetProfileInfoPanel;
-    [SerializeField] private GameObject LoginPanel;
     [SerializeField] private GameObject PasswordPanel;
     [SerializeField] private GameObject SetStationeryNamePanel;
+
+    [SerializeField] private GameObject LoginPanel;
+    
     [SerializeField] private GameObject InvisiblePanel;
 
     [SerializeField] private GameObject MessagePanel;
@@ -34,11 +39,16 @@ public class Scene2Manager : MonoBehaviour
         DisableBlankPanel();
         DisableInvisiblePanel();
 
+
+        DisableLandingPage();
+
         DisableSetPhoneNumberPanel();
-        DisableLoginPanel();
         DisablePasswordPanel();
         DisableSetProfileInfoPanel();
         DisableSetStationeryNamePanel();
+
+        DisableLoginPanel();
+        
 
         DisableMessagePanel();
     }
@@ -65,14 +75,7 @@ public class Scene2Manager : MonoBehaviour
 
 
 
-    public void EnableSetPhoneNumberPanel()
-    {
-        SetPhoneNumberPanel.SetActive(true);
-    }
-    public void DisableSetPhoneNumberPanel()
-    {
-        SetPhoneNumberPanel.SetActive(false);
-    }
+
     public void EnableLoginPanel()
     {
         LoginPanel.SetActive(true);
@@ -80,6 +83,41 @@ public class Scene2Manager : MonoBehaviour
     public void DisableLoginPanel()
     {
         LoginPanel?.SetActive(false);
+    }
+
+
+
+
+    public void EnableLandingPage()
+    {
+        LandingPagePanel.SetActive(true);
+    }
+    public void DisableLandingPage()
+    {
+        LandingPagePanel.SetActive(false);
+    }
+    public void ClickedPreviousPageButtonInLandingPage()
+    {
+        DisableAllPanels();
+        EnableLoginPanel();
+    }
+    public void ClickedGetStartedButton()
+    {
+        DisableAllPanels();
+        EnableSetPhoneNumberPanel();
+    }
+
+
+
+
+
+    public void EnableSetPhoneNumberPanel()
+    {
+        SetPhoneNumberPanel.SetActive(true);
+    }
+    public void DisableSetPhoneNumberPanel()
+    {
+        SetPhoneNumberPanel.SetActive(false);
     }
     public void EnablePasswordPanel()
     {

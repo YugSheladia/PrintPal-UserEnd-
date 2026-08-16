@@ -1176,24 +1176,27 @@ public class Scene3_Backend : MonoBehaviour
 
 
     //Calculate bill
-    public void CalculateBill(
-                                BillRequest request,
-                                string pdfPath,
-                                System.Action<BillResponse> callback
-                             )
+    //Calculate bill
+    public void CalculateBill
+    (
+        BillRequest request,
+        string pdfPath,
+        System.Action<BillResponse> callback
+    )
     {
         StartCoroutine(Coroutine_CalculateBill(
-                                                    request,
-                                                    pdfPath,
-                                                    callback
-                                              ));
+            request,
+            pdfPath,
+            callback
+        ));
     }
 
-    IEnumerator Coroutine_CalculateBill(
-                                            BillRequest request,
-                                            string pdfPath,
-                                            System.Action<BillResponse> callback
-                                       )
+    IEnumerator Coroutine_CalculateBill
+    (
+        BillRequest request,
+        string pdfPath,
+        System.Action<BillResponse> callback
+    )
     {
         if (!File.Exists(pdfPath))
         {
@@ -1203,7 +1206,9 @@ public class Scene3_Backend : MonoBehaviour
                 Message = "PDF file not found."
             });
 
-            Scene3ManagerScript.MessageText.text = "PDF could not be found, make sure all selected PDFs still exist.";
+            Scene3ManagerScript.MessageText.text =
+                "PDF could not be found, make sure all selected PDFs still exist.";
+
             Scene3ManagerScript.EnableMessagePanel();
 
             Scene3ManagerScript.DisableAllPanels();
@@ -1231,15 +1236,16 @@ public class Scene3_Backend : MonoBehaviour
         // Bill Request
         //--------------------------------------------------
 
+        form.AddField("PageSelection", request.PageSelection);
         form.AddField("PagesPerSheet", request.PagesPerSheet);
         form.AddField("SideSelection", request.SideSelection);
         form.AddField("Color", request.Color);
         form.AddField("Copies", request.Copies);
 
         using (UnityWebRequest webRequest = UnityWebRequest.Post(
-                                                                    "http://localhost:3000/calculate-bill",
-                                                                    form
-                                                                ))
+            "http://localhost:3000/calculate-bill",
+            form
+        ))
         {
             yield return webRequest.SendWebRequest();
 
@@ -1262,7 +1268,9 @@ public class Scene3_Backend : MonoBehaviour
                     };
                 }
 
-                Scene3ManagerScript.MessageText.text = "An error ocurred, try restarting the app.";
+                Scene3ManagerScript.MessageText.text =
+                    "An error occurred, try restarting the app.";
+
                 Scene3ManagerScript.EnableMessagePanel();
 
                 Scene3ManagerScript.DisableAllPanels();
@@ -1272,7 +1280,9 @@ public class Scene3_Backend : MonoBehaviour
                 yield break;
             }
 
-            BillResponse response = JsonUtility.FromJson<BillResponse>( webRequest.downloadHandler.text );
+            BillResponse response = JsonUtility.FromJson<BillResponse>(
+                webRequest.downloadHandler.text
+            );
 
             callback(response);
         }

@@ -25,12 +25,8 @@ public class Print_FinalBill : MonoBehaviour
         this.FinalBillAmount = FinalBillAmount;
         FinalPriceText.text = "`" + FinalBillAmount.ToString("F2");
 
-        OrderIDText.text    = "Order ID : Go to Recent Orders.";
-        OTPText.text        = "OTP : Go to Recent Orders.";
-
-        OrderIDValueText.text = "";
-        OTPValueText.text = "";
-
+        OrderIDValueText.text   = "Will be generated after successful payament.";
+        OTPValueText.text       = "Will be generated after successful payament.";
     } 
 
     // Used when recreating an EXISTING order with known OTP
