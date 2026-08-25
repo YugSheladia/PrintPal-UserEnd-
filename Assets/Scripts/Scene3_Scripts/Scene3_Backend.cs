@@ -9,6 +9,9 @@ using UnityEngine.Networking;
 
 
 
+
+
+
 //==================================
 // CREATE ORDER CLASSES
 //==================================
@@ -60,6 +63,9 @@ public class CurrentOrderResponse
 
     public string Message;
 }
+
+
+
 
 
 
@@ -225,6 +231,40 @@ public class UploadResponse
     public int TotalPages;
     public int FileSize;
 }
+
+
+
+
+
+
+
+
+//===================================================================================
+//These classes exist to check which type of prints are supported by a stationery.
+//===================================================================================
+[System.Serializable]
+public class StationeryPrinterInfo
+{
+    public int StationeryPrinterID;
+    public int StationeryID;
+
+    public string PrinterName;
+
+    public bool SupportsDoubleSidedPrinting;
+    public bool SupportsColorPrinting;
+}
+
+[System.Serializable]
+public class GetStationeryPrintersResponse
+{
+    public bool Success;
+    public string Message;
+
+    public StationeryPrinterInfo[] Printers;
+}
+
+
+
 
 
 
@@ -1457,5 +1497,110 @@ public class Scene3_Backend : MonoBehaviour
 
             Scene3ManagerScript.DisableInvisiblePanel();
         }
+    }
+
+
+
+
+
+
+
+
+
+
+    public void GetStationeryPrinters
+    (
+        int StationeryID,
+        System.Action<StationeryPrinterInfo[]> OnComplete
+    )
+    {
+        StartCoroutine
+        (
+            Coroutine_GetStationeryPrinters
+            (
+                StationeryID,
+                OnComplete
+            )
+        );
+    }
+    IEnumerator Coroutine_GetStationeryPrinters
+    (
+        int StationeryID,
+        System.Action<StationeryPrinterInfo[]> OnComplete
+    )
+    {
+        UnityWebRequest Request = UnityWebRequest.Get
+        (
+            "http://localhost:3000" + "/stationery/printers/" + StationeryID
+        );
+
+        yield return Request.SendWebRequest();
+
+        if (Request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError
+            (
+                "Failed to retrieve stationery printers: " +
+                Request.error
+            );
+
+            OnComplete?.Invoke(null);
+
+            yield break;
+        }
+
+        Debug.Log
+        (
+            "Stationery Printers Response =\n" +
+            Request.downloadHandler.text
+        );
+
+        GetStationeryPrintersResponse Response =
+            JsonUtility.FromJson<GetStationeryPrintersResponse>
+            (
+                Request.downloadHandler.text
+            );
+
+        if (Response == null)
+        {
+            Debug.LogError
+            (
+                "Failed to parse stationery printers response."
+            );
+
+            OnComplete?.Invoke(null);
+
+            yield break;
+        }
+
+        if (!Response.Success)
+        {
+            Debug.LogError
+            (
+                "Failed to retrieve stationery printers: " +
+                Response.Message
+            );
+
+            OnComplete?.Invoke(null);
+
+            yield break;
+        }
+
+        if (Response.Printers == null)
+        {
+            Debug.LogWarning
+            (
+                "Stationery printer list is null."
+            );
+
+            OnComplete?.Invoke
+            (
+                new StationeryPrinterInfo[0]
+            );
+
+            yield break;
+        }
+
+        OnComplete?.Invoke(Response.Printers);
     }
 }
