@@ -7,7 +7,7 @@ public class Scene2Manager : MonoBehaviour
 {
     [SerializeField] private GameObject BlankPanel;
 
-    [SerializeField] private GameObject LandingPagePanel;
+    //[SerializeField] private GameObject LandingPagePanel;
 
     [SerializeField] private GameObject SetPhoneNumberPanel;
     [SerializeField] private GameObject SetProfileInfoPanel;
@@ -39,8 +39,7 @@ public class Scene2Manager : MonoBehaviour
         DisableBlankPanel();
         DisableInvisiblePanel();
 
-
-        DisableLandingPage();
+        //DisableLandingPage();
 
         DisableSetPhoneNumberPanel();
         DisablePasswordPanel();
@@ -87,7 +86,7 @@ public class Scene2Manager : MonoBehaviour
 
 
 
-
+    /*
     public void EnableLandingPage()
     {
         LandingPagePanel.SetActive(true);
@@ -96,6 +95,7 @@ public class Scene2Manager : MonoBehaviour
     {
         LandingPagePanel.SetActive(false);
     }
+    */
     public void ClickedPreviousPageButtonInLandingPage()
     {
         DisableAllPanels();
