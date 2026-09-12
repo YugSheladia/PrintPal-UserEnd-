@@ -120,7 +120,8 @@ public class PrintDetails
             "\nMargin           = " + Margin            +
             "\nPagesPerSheet    = " + PagesPerSheet     +
             "\nCopies           = " + Copies            +
-            "\nPages            = " + Pages);
+            "\nPages            = " + Pages             +
+            "\nUnit price       = " + UnitPrice);
     }
 }
 

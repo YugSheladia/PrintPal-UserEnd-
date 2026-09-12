@@ -142,6 +142,8 @@ public class PrintBill : MonoBehaviour
     }
     public void SetBillDetailsInUI()
     {
+        PrintDetailsObject.PrintOrderDetails();
+
         PrintNumberText.text = (PrintDetailsObject.PrintNumber + 1).ToString();
 
         PDFNameText.text = PrintDetailsObject.PDFName;
@@ -161,10 +163,23 @@ public class PrintBill : MonoBehaviour
 
         int BillableSheets = PrintDetailsObject.EffectiveSheets;
 
+        if (PrintDetailsObject.SideSelection == SideSelectionEnum.SingleSided)
+        {
+            UnitPrice = PrintDetailsObject.Color == ColorEnum.BlackAndWhite
+                ? 2.5f
+                : 5.5f;
+        }
+        else
+        {
+            UnitPrice = PrintDetailsObject.Color == ColorEnum.BlackAndWhite
+                ? 4.5f
+                : 10.5f;
+        }
+
         PriceCalculation.text =
             BillableSheets + " Sheets x " +
             PrintDetailsObject.Copies + " Copies x `" +
-            PrintDetailsObject.UnitPrice.ToString("F2");
+            UnitPrice.ToString("F2");
 
         MarginText.text = PrintDetailsObject.Margin.ToString();
         OrientationText.text = PrintDetailsObject.Orientation.ToString();
