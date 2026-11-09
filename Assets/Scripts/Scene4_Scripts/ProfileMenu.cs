@@ -50,7 +50,7 @@ public class ProfileMenu : MonoBehaviour
 
         Script1.SetUserInfo(null);
 
-        SceneManager.LoadScene("Scene1_Loading+Landing");
+        SceneManager.LoadScene("Scene1_Loading");
     }
 
 
